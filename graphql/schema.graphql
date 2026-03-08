@@ -2,82 +2,117 @@ scalar Time
 scalar Upload
 
 enum Role {
-    USER
-    ADMIN
-    MODERATOR
+  USER
+  MODERATOR
+  ADMIN
 }
 
 type Account {
-    id: ID!
-    email: String!
-    password: String
-    username: String!
-    roles: [Role!]!
-    department: Department
-    createdAt: Time!
-    updatedAt: Time!
-    deletedAt: Time
+  id: ID!
+  email: String!
+  username: String!
+  roles: [Role!]!
+
+  department: Department
+
+  registeredEvents: [Event!]!
+
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: Time
 }
 
-
-
 type Department {
-    id: ID!
-    name: String!
-    moderators: [Account!]!
+  id: ID!
+  name: String!
+
+  moderators: [Account!]!
+  events: [Event!]!
 }
 
 type Event {
-    id: ID!
-    eventName: String!
-    description: String!
-    images:[File!]!
-    department: Department!
-    createdAt: Time!
-    updatedAt: Time!
-    deletedAt: Time
+  id: ID!
+  eventName: String!
+  description: String!
+
+  images: [File!]!
+
+  department: Department!
+
+  attendees: [Attendee!]!
+
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: Time
 }
 
 type File {
-    id: ID!
-    filename: String!
-    imageURL: String!
+  id: ID!
+  filename: String!
+  imageURL: String!
 }
 
 type Attendee {
-    id: ID!
-    createdAt: Time!
-    updatedAt: Time!
-    deletedAt: Time
-    events: [Event!]!
+  id: ID!
+
+  account: Account!
+  event: Event!
+
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: Time
 }
 
 input AccountInput {
-    email: String!
-    password: String!
-    username: String!
+  email: String!
+  password: String!
+  username: String!
 }
 
 input EventInput {
-    eventName: String!
-    description: String!
-    images: [String!]
+  eventName: String!
+  description: String!
+  departmentID: ID!
+  images: [String!]
 }
 
 input PaginationInput {
-    skip: Int
-    take: Int
+  skip: Int
+  take: Int
 }
 
 type Mutation {
-    uploadedFile(file: Upload!): File!
-    createAccount(account: AccountInput): Account
-    createEvent(event: EventInput): Event
-    registerForEvent(eventID: ID!): Attendee!
+
+  # auth
+  createAccount(account: AccountInput!): Account!
+
+  # events
+  createEvent(event: EventInput!): Event!
+
+  # register to event
+  registerForEvent(eventID: ID!): Attendee!
+
+  # cancel registration
+  unregisterFromEvent(eventID: ID!): Boolean!
+
+  # file upload
+  uploadFile(file: Upload!): File!
 }
 
 type Query {
-    accounts(pagination: PaginationInput, id: ID): [Account!]!
-    events(pagination: PaginationInput, query: ID, id: ID): [Event!]!
-    attendeeForEvent(pagination: PaginationInput, eventId: ID!): [Attendee!]!
+
+  # accounts
+  accounts(pagination: PaginationInput, id: ID): [Account!]!
+
+  # events
+  events(pagination: PaginationInput, query: String, id: ID): [Event!]!
+
+  # attendees of event (moderator)
+  attendeesForEvent(eventID: ID!): [Attendee!]!
+
+  # events of current user
+  myEvents: [Event!]!
+
+  # departments
+  departments: [Department!]!
 }

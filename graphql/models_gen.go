@@ -18,16 +18,18 @@ type AccountInput struct {
 
 type Attendee struct {
 	ID        string     `json:"id"`
+	Account   *Account   `json:"account"`
+	Event     *Event     `json:"event"`
 	CreatedAt time.Time  `json:"createdAt"`
 	UpdatedAt time.Time  `json:"updatedAt"`
 	DeletedAt *time.Time `json:"deletedAt,omitempty"`
-	Events    []*Event   `json:"events"`
 }
 
 type Department struct {
 	ID         string     `json:"id"`
 	Name       string     `json:"name"`
 	Moderators []*Account `json:"moderators"`
+	Events     []*Event   `json:"events"`
 }
 
 type Event struct {
@@ -36,15 +38,17 @@ type Event struct {
 	Description string      `json:"description"`
 	Images      []*File     `json:"images"`
 	Department  *Department `json:"department"`
+	Attendees   []*Attendee `json:"attendees"`
 	CreatedAt   time.Time   `json:"createdAt"`
 	UpdatedAt   time.Time   `json:"updatedAt"`
 	DeletedAt   *time.Time  `json:"deletedAt,omitempty"`
 }
 
 type EventInput struct {
-	EventName   string   `json:"eventName"`
-	Description string   `json:"description"`
-	Images      []string `json:"images,omitempty"`
+	EventName    string   `json:"eventName"`
+	Description  string   `json:"description"`
+	DepartmentID string   `json:"departmentID"`
+	Images       []string `json:"images,omitempty"`
 }
 
 type File struct {
@@ -68,19 +72,19 @@ type Role string
 
 const (
 	RoleUser      Role = "USER"
-	RoleAdmin     Role = "ADMIN"
 	RoleModerator Role = "MODERATOR"
+	RoleAdmin     Role = "ADMIN"
 )
 
 var AllRole = []Role{
 	RoleUser,
-	RoleAdmin,
 	RoleModerator,
+	RoleAdmin,
 }
 
 func (e Role) IsValid() bool {
 	switch e {
-	case RoleUser, RoleAdmin, RoleModerator:
+	case RoleUser, RoleModerator, RoleAdmin:
 		return true
 	}
 	return false
