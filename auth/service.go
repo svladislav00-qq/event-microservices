@@ -155,7 +155,7 @@ func (a *Auth) Login(ctx context.Context, email, password string) (string, error
 	return signedToken, nil
 }
 
-func (a *Auth) PromoteToModerator(ctx context.Context, userID string, departmentId string) error {
+func (a *Auth) PromoteToModerator(ctx context.Context, userID string, departmentId string) (*Account, error) {
 	const op = "auth.service.PromoteToModerator"
 
 	log := a.log.With(
@@ -166,25 +166,13 @@ func (a *Auth) PromoteToModerator(ctx context.Context, userID string, department
 
 	log.Info("promoting user to moderator with department")
 
-	user, err := a.usrProvider.GetAccountById(ctx, userID)
-	if err != nil {
-		if errors.Is(err, ErrUserNotFound) {
-			log.Error("user not found",
-				slog.String("op", op),
-				slog.String("userId", userID),
-				sl.Err(err))
-			return fmt.Errorf("%s: %w", op, ErrUserNotFound)
-		}
-		return fmt.Errorf("%s: %w", op, err)
-	}
-
-	err = a.usrProvider.PromoteToModerator(ctx, user.ID, departmentId)
+	err := a.usrProvider.PromoteToModerator(ctx, userID, departmentId)
 	if err != nil {
 		log.Error("can not promote user to moderator", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return nil
+	return a.usrProvider.GetAccountById(ctx, userID)
 }
 func (a *Auth) GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error) {
 	const op = "auth.service.GetAccounts"
