@@ -3,27 +3,33 @@ package config
 import (
 	"log/slog"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
+	Env         string
 	DatabaseURL string
-	Port        string
+	Port        int
 	JWTSecret   string
+	GRPCPort    int
 }
 
-var AppConfig Config
+func MustLoad() Config {
 
-func Load() {
-	var err error = godotenv.Load()
+	err := godotenv.Load("../../.env")
 	if err != nil {
-		slog.Error("Warning: env file not found, using environment variables")
+		slog.Warn("env file not found")
 	}
+	grpcPort, _ := strconv.Atoi(os.Getenv("GRPC_PORT"))
+	port, _ := strconv.Atoi(os.Getenv("PORT"))
 
-	AppConfig = Config{
+	return Config{
+		GRPCPort:    grpcPort,
+		Env:         os.Getenv("ENV"),
 		DatabaseURL: os.Getenv("DATABASE_URL"),
-		Port:        os.Getenv("Port"),
+		Port:        port,
 		JWTSecret:   os.Getenv("JWT_SECRET"),
 	}
 }

@@ -9,6 +9,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/minio/minio-go/v7 v7.0.99
 	github.com/segmentio/ksuid v1.0.4
+	github.com/tinrab/retry v1.0.0
 	github.com/vektah/gqlparser/v2 v2.5.32
 	google.golang.org/grpc v1.79.2
 	google.golang.org/protobuf v1.36.11

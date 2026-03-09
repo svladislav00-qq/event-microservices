@@ -11,7 +11,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type AuthServer interface {
+type AuthService interface {
 	Register(ctx context.Context, email, password, username string) (*Account, error)
 	Login(ctx context.Context, email, password string) (string, error)
 	PromoteToModerator(ctx context.Context, userID string, departmentId string) (*Account, error)
@@ -21,11 +21,11 @@ type AuthServer interface {
 
 type serverAuth struct {
 	pb.UnimplementedAuthServiceServer
-	auth AuthServer
+	auth AuthService
 }
 
-func NewAuthServer(gRPC *grpc.Server, authServer AuthServer) {
-	pb.RegisterAuthServiceServer(gRPC, &serverAuth{auth: authServer})
+func NewAuthServer(gRPC *grpc.Server, authService AuthService) {
+	pb.RegisterAuthServiceServer(gRPC, &serverAuth{auth: authService})
 }
 
 func (s *serverAuth) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
@@ -154,4 +154,18 @@ func roleToProto(role string) pb.Role {
 	default:
 		return pb.Role_ROLE_USER
 	}
+}
+
+func (a *Auth) GetAccountById(ctx context.Context, userID string) (*Account, error) {
+	const op = "auth.service.GetAccountById"
+
+	log := a.log.With("op", op, "user_id", userID)
+
+	acc, err := a.usrProvider.GetAccountById(ctx, userID)
+	if err != nil {
+		log.Error("failed to get account", "error", err)
+		return nil, err
+	}
+
+	return acc, nil
 }

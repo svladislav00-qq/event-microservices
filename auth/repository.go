@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"os"
 
 	"github.com/svladislav00-qq/event-microservices/pkg/logger/sl"
 	"gorm.io/driver/postgres"
@@ -31,11 +30,10 @@ var (
 	ErrUserNotFound = errors.New("user not found")
 )
 
-func NewPostgresRepository(log *slog.Logger, url string) (Repository, error) {
+func NewPostgresRepository(log *slog.Logger, databaseURL string) (Repository, error) {
 	const op = "auth.repository.NewPostgresRepository"
 
-	accountUrl := os.Getenv("ACCOUNT_DATABASE_URL")
-	db, err := gorm.Open(postgres.Open(accountUrl), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(databaseURL), &gorm.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
@@ -47,6 +45,11 @@ func NewPostgresRepository(log *slog.Logger, url string) (Repository, error) {
 
 	if err := sqlDB.Ping(); err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	err = db.AutoMigrate(&Account{})
+	if err != nil {
+		return nil, fmt.Errorf("%s: failed to migrate: %w", op, err)
 	}
 
 	return &postgresRepository{
