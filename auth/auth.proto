@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./pb";
+
+import "google/protobuf/timestamp.proto";
+
+enum Role {
+    ROLE_UNSPECIFIED = 0;
+    ROLE_USER = 1;
+    ROLE_MODERATOR = 2;
+    ROLE_ADMIN = 3;
+}
+
+message Account {
+    string id = 1;
+    string email = 2;
+    string username = 3;
+    Role role = 4;
+    string department_id = 5;
+    google.protobuf.Timestamp created_at = 6;
+}
+
+service AuthService {
+    rpc Register (RegisterRequest) returns (RegisterResponse){}
+    rpc Login (LoginRequest) returns (LoginResponse){}
+    rpc PromoteToModerator (PromoteToModeratorRequest) returns (PromoteToModeratorResponse){}
+    rpc GetMe (GetMeRequest) returns (GetMeResponse) {}
+}
+
+message RegisterRequest {
+    string email = 1; // Email of the user to register.
+    string password = 2; // Password of the user to register.
+    string username = 3; // Username of the user to register.
+}
+
+message RegisterResponse {
+    Account account = 1;
+
+}
+
+message LoginRequest {
+    string email = 1; // Email of the user to login.
+    string password = 2; // Password of the user to login.
+}
+
+message LoginResponse {
+    string token = 1; // Auth token of the logged in user.
+}
+
+message PromoteToModeratorRequest {
+  string user_id = 1;
+  string department_id = 2;
+}
+
+message PromoteToModeratorResponse {
+  Account account = 1;
+}
+
+message GetMeRequest {}
+
+message GetMeResponse{
+    Account account = 1;
+}
