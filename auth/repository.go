@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/svladislav00-qq/event-microservices/pkg/logger/sl"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -24,11 +25,6 @@ type postgresRepository struct {
 	db  *gorm.DB
 	log *slog.Logger
 }
-
-var (
-	ErrUserExists   = errors.New("user already exists")
-	ErrUserNotFound = errors.New("user not found")
-)
 
 func NewPostgresRepository(log *slog.Logger, databaseURL string) (Repository, error) {
 	const op = "auth.repository.NewPostgresRepository"
@@ -70,8 +66,12 @@ func (r *postgresRepository) Close() {
 func (r *postgresRepository) PostAccount(ctx context.Context, a Account) error {
 	const op = "auth.repository.PostAccount"
 
-	err := r.db.WithContext(ctx).Create(a).Error
+	err := r.db.WithContext(ctx).Create(&a).Error
 	if err != nil {
+		if isDuplicate(err) {
+			r.log.Error("user already exists", slog.String("op", op), sl.Err(err))
+			return ErrUserExists
+		}
 		r.log.Error("failed to post account",
 			slog.String("op", op),
 			sl.Err(err),
@@ -161,4 +161,9 @@ func (r *postgresRepository) PromoteToModerator(ctx context.Context, userID stri
 		return fmt.Errorf("%s: %w", op, err)
 	}
 	return nil
+}
+
+func isDuplicate(err error) bool {
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "23505"
 }

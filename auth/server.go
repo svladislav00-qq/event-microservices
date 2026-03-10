@@ -57,6 +57,9 @@ func (s *serverAuth) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Login
 
 	token, err := s.auth.Login(ctx, req.Email, req.Password)
 	if err != nil {
+		if errors.Is(err, ErrInvalidCredentials) {
+			return nil, status.Error(codes.InvalidArgument, "invalid email or password")
+		}
 		return nil, err
 	}
 
