@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./pb";
+
+import "google/protobuf/timestamp.proto";
+
+message Event {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+
+    string department = 4;
+    string created_by = 5;
+
+    google.protobuf.Timestamp start_time = 6;
+    google.protobuf.Timestamp end_time = 7;
+
+    google.protobuf.Timestamp created_at = 8;
+
+    repeated string file_urls = 9; 
+}
+
+
+
+message CreateEventRequest {
+    string name = 1;
+    string description = 2;
+    
+    google.protobuf.Timestamp start_time = 3;
+    google.protobuf.Timestamp end_time = 4;
+}
+
+message CreateEventResponse {
+    Event event = 1;
+}
+
+message UpdateEventRequest {
+    string name = 1;
+    string description = 2;
+
+    string department = 3;
+
+    google.protobuf.Timestamp start_time = 4;
+    google.protobuf.Timestamp end_time = 5;
+
+}
+
+message UpdateEventResponse{
+    Event event = 1;
+}
+
+message GetEventRequest {
+    string id = 1;
+}
+
+message GetEventResponse {
+    Event event = 1;
+}
+
+message GetEventsRequest{
+    uint64 skip = 1;
+    uint64 take = 2;
+    string department = 3;
+    string created_by = 4;
+}
+
+message GetEventsResponse {
+    repeated Event events = 1;
+}
+
+message DeleteEventRequest {
+    string event_id = 1;
+}
+
+message DeleteEventResponse {}
+
+message AttachFileToEventRequest {
+    string event_id = 1;
+    repeated string file_keys = 2; 
+}
+
+message AttachFileToEventResponse {
+    Event event = 1; 
+}
+
+message FileUpload {
+    string file_name = 1;
+    string content_type = 2;
+}
+
+message UploadFilesRequest {
+    string event_id = 1;
+    repeated FileUpload files = 2;
+}
+
+message UploadFilesResponse {
+    repeated UploadFileResponse files = 1;
+}
+
+message UploadFileResponse {
+    string upload_url = 1;
+    string file_key = 2;
+}
+
+service EventService{
+    rpc CreateEvent (CreateEventRequest) returns (CreateEventResponse){}
+    rpc UpdateEvent (UpdateEventRequest) returns (UpdateEventResponse) {}
+    rpc DeleteEvent (DeleteEventRequest) returns (DeleteEventResponse) {}
+    rpc GetEvent (GetEventRequest) returns (GetEventResponse) {}
+    rpc GetEvents (GetEventsRequest) returns (GetEventsResponse) {}
+    rpc AttachFileToEvent (AttachFileToEventRequest) returns (AttachFileToEventResponse) {}
+    rpc UploadFiles (UploadFilesRequest) returns (UploadFilesResponse) {}
+}
