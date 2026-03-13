@@ -1,16 +1,18 @@
 package event
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"io"
 	"log/slog"
-	"mime/multipart"
+	"net/http"
 	"path/filepath"
 	"time"
 
 	"github.com/segmentio/ksuid"
+	"github.com/svladislav00-qq/event-microservices/pkg/auth"
 	"github.com/svladislav00-qq/event-microservices/pkg/logger/sl"
 )
 
@@ -28,15 +30,13 @@ type EventProvider interface {
 	UpdateEvent(ctx context.Context, eventID string, data map[string]interface{}) (*Event, error)
 	DeleteEvent(ctx context.Context, eventID string) error
 	GetEventByID(ctx context.Context, eventID string) (*Event, error)
-	GetEventsByDepartment(ctx context.Context, department string, skip uint64, take uint64) ([]Event, error)
 	GetEvents(ctx context.Context, filter EventFilter) ([]Event, error)
+	GetFileImageKeys(ctx context.Context, eventID string) ([]string, error)
 }
 type FileSaver interface {
-	UploadFileData(ctx context.Context, f *EventFile) error
-	GetFileImageKeys(ctx context.Context, eventID string) ([]string, error)
-	UploadFile(ctx context.Context, objectName string, reader io.Reader, size int64, contentType string) (string, error)
-	GetURL(objectName string) string
-	DeleteFile(ctx context.Context, objectName string) error
+	UploadFile(ctx context.Context, fileKey string, reader io.Reader, size int64, contentType string) (string, error)
+	GetURL(fileKey string) string
+	DeleteFile(ctx context.Context, fileKey string) error
 }
 
 func NewEventService(log *slog.Logger, evntSaver EventSaver, evntProvider EventProvider, flSaver FileSaver) *EventService {
@@ -48,7 +48,7 @@ func NewEventService(log *slog.Logger, evntSaver EventSaver, evntProvider EventP
 	}
 }
 
-func (e *EventService) CreateEvent(ctx context.Context, name string, description string, filesURLs string, startTime time.Time, endTime time.Time) (*Event, error) {
+func (e *EventService) CreateEvent(ctx context.Context, name string, description string, fileKeys []string, capacity *int, startTime time.Time, endTime time.Time) (*Event, error) {
 	const op = "event.service.CreateEvent"
 
 	log := e.log.With(
@@ -58,14 +58,26 @@ func (e *EventService) CreateEvent(ctx context.Context, name string, description
 
 	log.Info("creating event")
 
+	user, ok := auth.UserFromContext(ctx)
+	if !ok {
+		return nil, ErrUnauthorized
+	}
+
+	if user.Role == "user" {
+		return nil, ErrPermissionDenied
+	}
+
 	newEvent := &Event{
 		ID:          ksuid.New().String(),
 		EventName:   name,
 		Description: description,
+		Department:  user.Department,
+		CreatedBy:   user.Username,
 		StartTime:   startTime,
 		EndTime:     endTime,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
+		Capacity:    capacity,
 	}
 
 	if err := e.evntSaver.CreateEvent(ctx, newEvent); err != nil {
@@ -80,7 +92,7 @@ func (e *EventService) CreateEvent(ctx context.Context, name string, description
 	return newEvent, nil
 }
 
-func (e *EventService) UploadFile(ctx context.Context, file multipart.File, header *multipart.FileHeader, eventID string) (string, error) {
+func (e *EventService) UploadFile(ctx context.Context, eventID string, fileName string, data []byte) (string, string, error) {
 	const op = "event.service.UploadFile"
 
 	log := e.log.With(
@@ -90,88 +102,40 @@ func (e *EventService) UploadFile(ctx context.Context, file multipart.File, head
 
 	log.Info("starting upload files")
 
+	if len(data) == 0 {
+		return "", "", fmt.Errorf("%s: empty file", op)
+	}
+
 	_, err := e.evntProvider.GetEventByID(ctx, eventID)
 	if err != nil {
 		if errors.Is(err, ErrEventNotFound) {
 			log.Error("event not found", sl.Err(err))
-			return "", ErrEventNotFound
+			return "", "", ErrEventNotFound
 		}
 		log.Error("failed to get event", sl.Err(err))
-		return "", fmt.Errorf("%s: %w", op, err)
+		return "", "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	if header.Size > 5<<20 {
-		log.Error("file too large", sl.Err(err))
-		return "", ErrFileTooLarge
-	}
+	reader := bytes.NewReader(data)
 
-	contentType := filepath.Ext(header.Filename)
-	fileKey := fmt.Sprintf("%s%s", ksuid.New().String(), contentType)
+	fileKey := ksuid.New().String() + filepath.Ext(fileName)
 
 	_, err = e.flSaver.UploadFile(
 		ctx,
 		fileKey,
-		file,
-		header.Size,
-		header.Header.Get("Content-Type"),
+		reader,
+		int64(len(data)),
+		http.DetectContentType(data),
 	)
 	if err != nil {
-		log.Error("failed to upload file in cloud", sl.Err(err))
-		return "", fmt.Errorf("%s: %w", op, err)
-	}
-
-	fileData := &EventFile{
-		ID:       ksuid.New().String(),
-		EventID:  eventID,
-		FileKey:  fileKey,
-		FileType: header.Header.Get("Content-Type"),
-	}
-
-	err = e.flSaver.UploadFileData(ctx, fileData)
-	if err != nil {
-		_ = e.flSaver.DeleteFile(ctx, fileKey)
-		log.Error("failed to save file data", sl.Err(err))
-		return "", fmt.Errorf("%s: %w", op, err)
+		log.Error("failed to upload file", sl.Err(err))
+		return "", "", fmt.Errorf("%s: %w", op, err)
 	}
 
 	url := e.flSaver.GetURL(fileKey)
 
-	return url, nil
-}
+	return url, fileKey, nil
 
-func (e *EventService) AttachEventFile(ctx context.Context, eventID string, fileKeys []string) (*Event, error) {
-	const op = "event.service.AttachEventFile"
-
-	log := e.log.With(
-		slog.String("op", op),
-		slog.String("eventID", eventID),
-	)
-
-	log.Info("attaching file to event")
-
-	event, err := e.evntProvider.GetEventByID(ctx, eventID)
-	if err != nil {
-		if errors.Is(err, ErrEventNotFound) {
-			log.Error("event not found", sl.Err(err))
-			return nil, ErrEventNotFound
-		}
-
-		log.Error("failed to get event", sl.Err(err))
-		return nil, fmt.Errorf("%s: %w", op, err)
-	}
-
-	changes := map[string]any{
-		"files": fileKeys,
-	}
-
-	updatedEvent, err := e.evntProvider.UpdateEvent(ctx, event.ID, changes)
-	if err != nil {
-		log.Error("failed to update events files", sl.Err(err))
-		return nil, fmt.Errorf("%s: %w", op, err)
-	}
-	log.Info("files successfully attached to event")
-
-	return updatedEvent, nil
 }
 
 func (e *EventService) DeleteEvent(ctx context.Context, eventID string) error {
@@ -253,4 +217,79 @@ func (e *EventService) GetEvents(ctx context.Context, filter EventFilter) ([]Eve
 	}
 
 	return events, nil
+}
+
+func (e *EventService) UpdateEvent(ctx context.Context, eventID string, updateData map[string]interface{}) (*Event, error) {
+	const op = "event.service.UpdateEvent"
+
+	log := e.log.With(
+		slog.String("op", op),
+		slog.String("eventID", eventID),
+		slog.Any("updateData", updateData),
+	)
+
+	log.Info("starting to update event data")
+
+	event, err := e.evntProvider.GetEventByID(ctx, eventID)
+	if err != nil {
+		if errors.Is(err, ErrEventNotFound) {
+			log.Error("event not found", sl.Err(err))
+			return nil, ErrEventNotFound
+		}
+
+		log.Error("failed to get event", sl.Err(err))
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	updatedEvent, err := e.evntProvider.UpdateEvent(ctx, event.ID, updateData)
+	if err != nil {
+		log.Error("failed to update event", sl.Err(err))
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return updatedEvent, nil
+}
+
+func (e *EventService) AttachEventFile(ctx context.Context, eventID string, fileKeys []string) (*Event, error) {
+	const op = "event.service.AttachEventFile"
+
+	log := e.log.With(
+		slog.String("op", op),
+		slog.String("eventID", eventID),
+	)
+
+	log.Info("starting to attach event file")
+
+	event, err := e.evntProvider.GetEventByID(ctx, eventID)
+	if err != nil {
+		if errors.Is(err, ErrEventNotFound) {
+			log.Error("event not found", sl.Err(err))
+			return nil, ErrEventNotFound
+		}
+
+		log.Error("failed to get event", sl.Err(err))
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	fileKeys, err = e.evntProvider.GetFileImageKeys(ctx, event.ID)
+	if err != nil {
+		if errors.Is(err, ErrEventNotFound) {
+			log.Error("files not found to attach in event", sl.Err(err))
+			return nil, ErrFileNotFound
+		}
+		log.Error("failed to get file key", sl.Err(err))
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	changes := map[string]interface{}{
+		"files": fileKeys,
+	}
+
+	updatedEvent, err := e.evntProvider.UpdateEvent(ctx, event.ID, changes)
+	if err != nil {
+		log.Error("failed to attach event file", sl.Err(err))
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return updatedEvent, nil
 }

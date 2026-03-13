@@ -20,6 +20,8 @@ message Event {
     google.protobuf.Timestamp created_at = 8;
 
     repeated string file_urls = 9; 
+
+    uint32 capacity = 10;
 }
 
 
@@ -30,6 +32,10 @@ message CreateEventRequest {
     
     google.protobuf.Timestamp start_time = 3;
     google.protobuf.Timestamp end_time = 4;
+
+    optional uint32 capacity = 5;
+
+    repeated string file_urls = 6;
 }
 
 message CreateEventResponse {
@@ -37,13 +43,16 @@ message CreateEventResponse {
 }
 
 message UpdateEventRequest {
-    string name = 1;
-    string description = 2;
+    string id = 1;
+    string name = 2;
+    string description = 3;
 
-    string department = 3;
+    string department = 4;
 
-    google.protobuf.Timestamp start_time = 4;
-    google.protobuf.Timestamp end_time = 5;
+    google.protobuf.Timestamp start_time = 5;
+    google.protobuf.Timestamp end_time = 6;
+
+    optional uint32 capacity = 7;
 
 }
 
@@ -71,13 +80,13 @@ message GetEventsResponse {
 }
 
 message DeleteEventRequest {
-    string event_id = 1;
+    string id = 1;
 }
 
 message DeleteEventResponse {}
 
 message AttachFileToEventRequest {
-    string event_id = 1;
+    string id = 1;
     repeated string file_keys = 2; 
 }
 
@@ -88,10 +97,11 @@ message AttachFileToEventResponse {
 message FileUpload {
     string file_name = 1;
     string content_type = 2;
+    bytes file_data =3;
 }
 
 message UploadFilesRequest {
-    string event_id = 1;
+    string id = 1;
     repeated FileUpload files = 2;
 }
 

@@ -10,6 +10,7 @@ type Event struct {
 	ID          string `json:"id" gorm:"primaryKey"`
 	EventName   string `json:"event_name" gorm:"not null"`
 	Description string `json:"description"`
+	Capacity    *int   `json:"capacity"`
 
 	Department string `json:"department" gorm:"index"`
 	CreatedBy  string `json:"created_by" gorm:"index"`

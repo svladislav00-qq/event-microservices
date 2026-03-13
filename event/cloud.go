@@ -48,8 +48,8 @@ func (s *MinioStorage) UploadFile(ctx context.Context, objectName string, reader
 	return objectName, nil
 }
 
-func (s *MinioStorage) GetURL(objectName string) string {
-	return fmt.Sprintf("%s/%s/%s", s.publicURL, s.bucket, objectName)
+func (s *MinioStorage) GetURL(fileKey string) string {
+	return fmt.Sprintf("%s/%s/%s", s.publicURL, s.bucket, fileKey)
 }
 
 func (s *MinioStorage) DeleteFile(ctx context.Context, objectName string) error {

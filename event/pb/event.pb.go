@@ -33,6 +33,7 @@ type Event struct {
 	EndTime       *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	FileUrls      []string               `protobuf:"bytes,9,rep,name=file_urls,json=fileUrls,proto3" json:"file_urls,omitempty"`
+	Capacity      uint32                 `protobuf:"varint,10,opt,name=capacity,proto3" json:"capacity,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -130,12 +131,21 @@ func (x *Event) GetFileUrls() []string {
 	return nil
 }
 
+func (x *Event) GetCapacity() uint32 {
+	if x != nil {
+		return x.Capacity
+	}
+	return 0
+}
+
 type CreateEventRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
 	StartTime     *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
 	EndTime       *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	Capacity      *uint32                `protobuf:"varint,5,opt,name=capacity,proto3,oneof" json:"capacity,omitempty"`
+	FileUrls      []string               `protobuf:"bytes,6,rep,name=file_urls,json=fileUrls,proto3" json:"file_urls,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -198,6 +208,20 @@ func (x *CreateEventRequest) GetEndTime() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *CreateEventRequest) GetCapacity() uint32 {
+	if x != nil && x.Capacity != nil {
+		return *x.Capacity
+	}
+	return 0
+}
+
+func (x *CreateEventRequest) GetFileUrls() []string {
+	if x != nil {
+		return x.FileUrls
+	}
+	return nil
+}
+
 type CreateEventResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Event         *Event                 `protobuf:"bytes,1,opt,name=event,proto3" json:"event,omitempty"`
@@ -244,11 +268,13 @@ func (x *CreateEventResponse) GetEvent() *Event {
 
 type UpdateEventRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	Department    string                 `protobuf:"bytes,3,opt,name=department,proto3" json:"department,omitempty"`
-	StartTime     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	EndTime       *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Department    string                 `protobuf:"bytes,4,opt,name=department,proto3" json:"department,omitempty"`
+	StartTime     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	EndTime       *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	Capacity      *uint32                `protobuf:"varint,7,opt,name=capacity,proto3,oneof" json:"capacity,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -281,6 +307,13 @@ func (x *UpdateEventRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use UpdateEventRequest.ProtoReflect.Descriptor instead.
 func (*UpdateEventRequest) Descriptor() ([]byte, []int) {
 	return file_event_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *UpdateEventRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
 }
 
 func (x *UpdateEventRequest) GetName() string {
@@ -316,6 +349,13 @@ func (x *UpdateEventRequest) GetEndTime() *timestamppb.Timestamp {
 		return x.EndTime
 	}
 	return nil
+}
+
+func (x *UpdateEventRequest) GetCapacity() uint32 {
+	if x != nil && x.Capacity != nil {
+		return *x.Capacity
+	}
+	return 0
 }
 
 type UpdateEventResponse struct {
@@ -564,7 +604,7 @@ func (x *GetEventsResponse) GetEvents() []*Event {
 
 type DeleteEventRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -599,9 +639,9 @@ func (*DeleteEventRequest) Descriptor() ([]byte, []int) {
 	return file_event_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *DeleteEventRequest) GetEventId() string {
+func (x *DeleteEventRequest) GetId() string {
 	if x != nil {
-		return x.EventId
+		return x.Id
 	}
 	return ""
 }
@@ -644,7 +684,7 @@ func (*DeleteEventResponse) Descriptor() ([]byte, []int) {
 
 type AttachFileToEventRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	FileKeys      []string               `protobuf:"bytes,2,rep,name=file_keys,json=fileKeys,proto3" json:"file_keys,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -680,9 +720,9 @@ func (*AttachFileToEventRequest) Descriptor() ([]byte, []int) {
 	return file_event_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *AttachFileToEventRequest) GetEventId() string {
+func (x *AttachFileToEventRequest) GetId() string {
 	if x != nil {
-		return x.EventId
+		return x.Id
 	}
 	return ""
 }
@@ -742,6 +782,7 @@ type FileUpload struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	FileName      string                 `protobuf:"bytes,1,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty"`
 	ContentType   string                 `protobuf:"bytes,2,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"`
+	FileData      []byte                 `protobuf:"bytes,3,opt,name=file_data,json=fileData,proto3" json:"file_data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -790,9 +831,16 @@ func (x *FileUpload) GetContentType() string {
 	return ""
 }
 
+func (x *FileUpload) GetFileData() []byte {
+	if x != nil {
+		return x.FileData
+	}
+	return nil
+}
+
 type UploadFilesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Files         []*FileUpload          `protobuf:"bytes,2,rep,name=files,proto3" json:"files,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -828,9 +876,9 @@ func (*UploadFilesRequest) Descriptor() ([]byte, []int) {
 	return file_event_proto_rawDescGZIP(), []int{14}
 }
 
-func (x *UploadFilesRequest) GetEventId() string {
+func (x *UploadFilesRequest) GetId() string {
 	if x != nil {
-		return x.EventId
+		return x.Id
 	}
 	return ""
 }
@@ -942,7 +990,7 @@ var File_event_proto protoreflect.FileDescriptor
 
 const file_event_proto_rawDesc = "" +
 	"\n" +
-	"\vevent.proto\x12\x02pb\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd6\x02\n" +
+	"\vevent.proto\x12\x02pb\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf2\x02\n" +
 	"\x05Event\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -957,24 +1005,32 @@ const file_event_proto_rawDesc = "" +
 	"\bend_time\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\aendTime\x129\n" +
 	"\n" +
 	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x1b\n" +
-	"\tfile_urls\x18\t \x03(\tR\bfileUrls\"\xbc\x01\n" +
+	"\tfile_urls\x18\t \x03(\tR\bfileUrls\x12\x1a\n" +
+	"\bcapacity\x18\n" +
+	" \x01(\rR\bcapacity\"\x87\x02\n" +
 	"\x12CreateEventRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x129\n" +
 	"\n" +
 	"start_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime\x125\n" +
-	"\bend_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\aendTime\"6\n" +
+	"\bend_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\aendTime\x12\x1f\n" +
+	"\bcapacity\x18\x05 \x01(\rH\x00R\bcapacity\x88\x01\x01\x12\x1b\n" +
+	"\tfile_urls\x18\x06 \x03(\tR\bfileUrlsB\v\n" +
+	"\t_capacity\"6\n" +
 	"\x13CreateEventResponse\x12\x1f\n" +
-	"\x05event\x18\x01 \x01(\v2\t.pb.EventR\x05event\"\xdc\x01\n" +
-	"\x12UpdateEventRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1e\n" +
+	"\x05event\x18\x01 \x01(\v2\t.pb.EventR\x05event\"\x9a\x02\n" +
+	"\x12UpdateEventRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1e\n" +
 	"\n" +
-	"department\x18\x03 \x01(\tR\n" +
+	"department\x18\x04 \x01(\tR\n" +
 	"department\x129\n" +
 	"\n" +
-	"start_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime\x125\n" +
-	"\bend_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\aendTime\"6\n" +
+	"start_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime\x125\n" +
+	"\bend_time\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\aendTime\x12\x1f\n" +
+	"\bcapacity\x18\a \x01(\rH\x00R\bcapacity\x88\x01\x01B\v\n" +
+	"\t_capacity\"6\n" +
 	"\x13UpdateEventResponse\x12\x1f\n" +
 	"\x05event\x18\x01 \x01(\v2\t.pb.EventR\x05event\"!\n" +
 	"\x0fGetEventRequest\x12\x0e\n" +
@@ -990,21 +1046,22 @@ const file_event_proto_rawDesc = "" +
 	"\n" +
 	"created_by\x18\x04 \x01(\tR\tcreatedBy\"6\n" +
 	"\x11GetEventsResponse\x12!\n" +
-	"\x06events\x18\x01 \x03(\v2\t.pb.EventR\x06events\"/\n" +
-	"\x12DeleteEventRequest\x12\x19\n" +
-	"\bevent_id\x18\x01 \x01(\tR\aeventId\"\x15\n" +
-	"\x13DeleteEventResponse\"R\n" +
-	"\x18AttachFileToEventRequest\x12\x19\n" +
-	"\bevent_id\x18\x01 \x01(\tR\aeventId\x12\x1b\n" +
+	"\x06events\x18\x01 \x03(\v2\t.pb.EventR\x06events\"$\n" +
+	"\x12DeleteEventRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\x15\n" +
+	"\x13DeleteEventResponse\"G\n" +
+	"\x18AttachFileToEventRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\tfile_keys\x18\x02 \x03(\tR\bfileKeys\"<\n" +
 	"\x19AttachFileToEventResponse\x12\x1f\n" +
-	"\x05event\x18\x01 \x01(\v2\t.pb.EventR\x05event\"L\n" +
+	"\x05event\x18\x01 \x01(\v2\t.pb.EventR\x05event\"i\n" +
 	"\n" +
 	"FileUpload\x12\x1b\n" +
 	"\tfile_name\x18\x01 \x01(\tR\bfileName\x12!\n" +
-	"\fcontent_type\x18\x02 \x01(\tR\vcontentType\"U\n" +
-	"\x12UploadFilesRequest\x12\x19\n" +
-	"\bevent_id\x18\x01 \x01(\tR\aeventId\x12$\n" +
+	"\fcontent_type\x18\x02 \x01(\tR\vcontentType\x12\x1b\n" +
+	"\tfile_data\x18\x03 \x01(\fR\bfileData\"J\n" +
+	"\x12UploadFilesRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12$\n" +
 	"\x05files\x18\x02 \x03(\v2\x0e.pb.FileUploadR\x05files\"C\n" +
 	"\x13UploadFilesResponse\x12,\n" +
 	"\x05files\x18\x01 \x03(\v2\x16.pb.UploadFileResponseR\x05files\"N\n" +
@@ -1095,6 +1152,8 @@ func file_event_proto_init() {
 	if File_event_proto != nil {
 		return
 	}
+	file_event_proto_msgTypes[1].OneofWrappers = []any{}
+	file_event_proto_msgTypes[3].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

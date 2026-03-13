@@ -28,6 +28,7 @@ type EventRepository interface {
 type FileRepository interface {
 	UploadFileData(ctx context.Context, f *EventFile) error
 	GetFileImageKeys(ctx context.Context, eventID string) ([]string, error)
+	DeleteFile(ctx context.Context, fileKey string) error
 }
 
 type postgresRepository struct {
@@ -186,4 +187,8 @@ func (r *postgresRepository) GetFileImageKeys(ctx context.Context, eventID strin
 	}
 
 	return fileKeys, nil
+}
+
+func (r *postgresRepository) DeleteFile(ctx context.Context, fileKey string) error {
+	return r.db.WithContext(ctx).Where("file_key = ?", fileKey).Delete(&EventFile{}).Error
 }
