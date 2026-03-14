@@ -147,15 +147,15 @@ func (r *postgresRepository) PromoteToModerator(ctx context.Context, userID stri
 	const op = "auth.repository.PromoteToModerator"
 
 	err := r.db.WithContext(ctx).Model(&Account{}).Where("id = ?", userID).Updates(map[string]interface{}{
-		"role":          "moderator",
-		"department_id": departmentId,
+		"role":       "moderator",
+		"department": departmentId,
 	}).Error
 
 	if err != nil {
 		r.log.Error("failed to promote user to moderator",
 			slog.String("op", op),
 			slog.String("user_id", userID),
-			slog.String("department_id", departmentId),
+			slog.String("department", departmentId),
 			sl.Err(err),
 		)
 		return fmt.Errorf("%s: %w", op, err)

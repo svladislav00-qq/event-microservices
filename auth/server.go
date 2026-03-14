@@ -68,23 +68,23 @@ func (s *serverAuth) PromoteToModerator(ctx context.Context, req *pb.PromoteToMo
 		return nil, err
 	}
 
-	account, err := s.auth.PromoteToModerator(ctx, req.UserId, req.DepartmentId)
+	account, err := s.auth.PromoteToModerator(ctx, req.UserId, req.Department)
 	if err != nil {
 		return nil, err
 	}
 
 	return &pb.PromoteToModeratorResponse{Account: &pb.Account{
-		Id:           account.ID,
-		Email:        account.Email,
-		Username:     account.Username,
-		Role:         roleToProto(account.Role),
-		DepartmentId: account.Department,
-		CreatedAt:    timestamppb.New(account.CreatedAt),
+		Id:         account.ID,
+		Email:      account.Email,
+		Username:   account.Username,
+		Role:       roleToProto(account.Role),
+		Department: account.Department,
+		CreatedAt:  timestamppb.New(account.CreatedAt),
 	}}, nil
 }
 
 func (s *serverAuth) GetMe(ctx context.Context, req *pb.GetMeRequest) (*pb.GetMeResponse, error) {
-	userID, ok := ctx.Value("user_id").(string)
+	userID, ok := ctx.Value(userIDKey).(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "user not authenticated")
 	}
@@ -139,7 +139,7 @@ func validatePromoteToModerator(req *pb.PromoteToModeratorRequest) error {
 	if req.GetUserId() == "" {
 		return status.Error(codes.InvalidArgument, "userID is required")
 	}
-	if req.GetDepartmentId() == "" {
+	if req.GetDepartment() == "" {
 		return status.Error(codes.InvalidArgument, "departmentID is required")
 	}
 	return nil

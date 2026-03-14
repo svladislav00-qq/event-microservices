@@ -18,7 +18,7 @@ message Account {
     string email = 2;
     string username = 3;
     Role role = 4;
-    string department_id = 5;
+    string department = 5;
     google.protobuf.Timestamp created_at = 6;
 }
 
@@ -51,7 +51,7 @@ message LoginResponse {
 
 message PromoteToModeratorRequest {
   string user_id = 1;
-  string department_id = 2;
+  string department = 2;
 }
 
 message PromoteToModeratorResponse {

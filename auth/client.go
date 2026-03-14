@@ -68,8 +68,8 @@ func (c *Client) Login(ctx context.Context, email, password string) (string, err
 
 func (c *Client) PromoteToModerator(ctx context.Context, userID string, departmentID string) (*Account, error) {
 	r, err := c.service.PromoteToModerator(ctx, &pb.PromoteToModeratorRequest{
-		UserId:       userID,
-		DepartmentId: departmentID,
+		UserId:     userID,
+		Department: departmentID,
 	})
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func (c *Client) PromoteToModerator(ctx context.Context, userID string, departme
 		Email:      acc.Email,
 		Username:   acc.Username,
 		Role:       acc.Role.String(),
-		Department: acc.DepartmentId,
+		Department: acc.Department,
 		CreatedAt:  acc.CreatedAt.AsTime(),
 	}, nil
 }

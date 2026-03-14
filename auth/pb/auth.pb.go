@@ -80,7 +80,7 @@ type Account struct {
 	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	Username      string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
 	Role          Role                   `protobuf:"varint,4,opt,name=role,proto3,enum=pb.Role" json:"role,omitempty"`
-	DepartmentId  string                 `protobuf:"bytes,5,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	Department    string                 `protobuf:"bytes,5,opt,name=department,proto3" json:"department,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -144,9 +144,9 @@ func (x *Account) GetRole() Role {
 	return Role_ROLE_UNSPECIFIED
 }
 
-func (x *Account) GetDepartmentId() string {
+func (x *Account) GetDepartment() string {
 	if x != nil {
-		return x.DepartmentId
+		return x.Department
 	}
 	return ""
 }
@@ -361,7 +361,7 @@ func (x *LoginResponse) GetToken() string {
 type PromoteToModeratorRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	DepartmentId  string                 `protobuf:"bytes,2,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	Department    string                 `protobuf:"bytes,2,opt,name=department,proto3" json:"department,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -403,9 +403,9 @@ func (x *PromoteToModeratorRequest) GetUserId() string {
 	return ""
 }
 
-func (x *PromoteToModeratorRequest) GetDepartmentId() string {
+func (x *PromoteToModeratorRequest) GetDepartment() string {
 	if x != nil {
-		return x.DepartmentId
+		return x.Department
 	}
 	return ""
 }
@@ -539,13 +539,15 @@ var File_auth_proto protoreflect.FileDescriptor
 const file_auth_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"auth.proto\x12\x02pb\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc9\x01\n" +
+	"auth.proto\x12\x02pb\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc4\x01\n" +
 	"\aAccount\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
 	"\busername\x18\x03 \x01(\tR\busername\x12\x1c\n" +
-	"\x04role\x18\x04 \x01(\x0e2\b.pb.RoleR\x04role\x12#\n" +
-	"\rdepartment_id\x18\x05 \x01(\tR\fdepartmentId\x129\n" +
+	"\x04role\x18\x04 \x01(\x0e2\b.pb.RoleR\x04role\x12\x1e\n" +
+	"\n" +
+	"department\x18\x05 \x01(\tR\n" +
+	"department\x129\n" +
 	"\n" +
 	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"_\n" +
 	"\x0fRegisterRequest\x12\x14\n" +
@@ -558,10 +560,12 @@ const file_auth_proto_rawDesc = "" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"%\n" +
 	"\rLoginResponse\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05token\"Y\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\"T\n" +
 	"\x19PromoteToModeratorRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12#\n" +
-	"\rdepartment_id\x18\x02 \x01(\tR\fdepartmentId\"C\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1e\n" +
+	"\n" +
+	"department\x18\x02 \x01(\tR\n" +
+	"department\"C\n" +
 	"\x1aPromoteToModeratorResponse\x12%\n" +
 	"\aaccount\x18\x01 \x01(\v2\v.pb.AccountR\aaccount\"\x0e\n" +
 	"\fGetMeRequest\"6\n" +
