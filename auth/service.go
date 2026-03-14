@@ -193,24 +193,3 @@ func (a *Auth) GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Acc
 
 	return res, nil
 }
-
-func ParseJWT(tokenString string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(
-		tokenString,
-		&Claims{},
-		func(t *jwt.Token) (any, error) {
-			return []byte(os.Getenv("JWT_SECRET")), nil
-		},
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	claims, ok := token.Claims.(*Claims)
-	if !ok || !token.Valid {
-		return nil, errors.New("invalid token")
-	}
-
-	return claims, nil
-}

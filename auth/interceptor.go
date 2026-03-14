@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	authorization "github.com/svladislav00-qq/event-microservices/pkg/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -33,7 +34,7 @@ func AuthInterceptor(
 
 	tokenString := strings.TrimPrefix(authHeader[0], "Bearer ")
 
-	claims, err := ParseJWT(tokenString)
+	claims, err := authorization.ParseJWT(tokenString)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "invalid token")
 	}

@@ -1,4 +1,4 @@
-package auth
+package authorization
 
 type User struct {
 	ID         string
