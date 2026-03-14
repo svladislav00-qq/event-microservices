@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/segmentio/ksuid"
-	"github.com/svladislav00-qq/event-microservices/pkg/auth"
+	authorization "github.com/svladislav00-qq/event-microservices/pkg/auth"
 	"github.com/svladislav00-qq/event-microservices/pkg/logger/sl"
 )
 
@@ -58,7 +58,7 @@ func (e *EventService) CreateEvent(ctx context.Context, name string, description
 
 	log.Info("creating event")
 
-	user, ok := auth.UserFromContext(ctx)
+	user, ok := authorization.UserFromContext(ctx)
 	if !ok {
 		return nil, ErrUnauthorized
 	}
