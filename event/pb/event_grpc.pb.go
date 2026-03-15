@@ -19,13 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	EventService_CreateEvent_FullMethodName       = "/pb.EventService/CreateEvent"
-	EventService_UpdateEvent_FullMethodName       = "/pb.EventService/UpdateEvent"
-	EventService_DeleteEvent_FullMethodName       = "/pb.EventService/DeleteEvent"
-	EventService_GetEvent_FullMethodName          = "/pb.EventService/GetEvent"
-	EventService_GetEvents_FullMethodName         = "/pb.EventService/GetEvents"
-	EventService_AttachFileToEvent_FullMethodName = "/pb.EventService/AttachFileToEvent"
-	EventService_UploadFiles_FullMethodName       = "/pb.EventService/UploadFiles"
+	EventService_CreateEvent_FullMethodName = "/pb.EventService/CreateEvent"
+	EventService_UpdateEvent_FullMethodName = "/pb.EventService/UpdateEvent"
+	EventService_DeleteEvent_FullMethodName = "/pb.EventService/DeleteEvent"
+	EventService_GetEvent_FullMethodName    = "/pb.EventService/GetEvent"
+	EventService_GetEvents_FullMethodName   = "/pb.EventService/GetEvents"
+	EventService_UploadFiles_FullMethodName = "/pb.EventService/UploadFiles"
 )
 
 // EventServiceClient is the client API for EventService service.
@@ -37,7 +36,6 @@ type EventServiceClient interface {
 	DeleteEvent(ctx context.Context, in *DeleteEventRequest, opts ...grpc.CallOption) (*DeleteEventResponse, error)
 	GetEvent(ctx context.Context, in *GetEventRequest, opts ...grpc.CallOption) (*GetEventResponse, error)
 	GetEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (*GetEventsResponse, error)
-	AttachFileToEvent(ctx context.Context, in *AttachFileToEventRequest, opts ...grpc.CallOption) (*AttachFileToEventResponse, error)
 	UploadFiles(ctx context.Context, in *UploadFilesRequest, opts ...grpc.CallOption) (*UploadFilesResponse, error)
 }
 
@@ -99,16 +97,6 @@ func (c *eventServiceClient) GetEvents(ctx context.Context, in *GetEventsRequest
 	return out, nil
 }
 
-func (c *eventServiceClient) AttachFileToEvent(ctx context.Context, in *AttachFileToEventRequest, opts ...grpc.CallOption) (*AttachFileToEventResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AttachFileToEventResponse)
-	err := c.cc.Invoke(ctx, EventService_AttachFileToEvent_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *eventServiceClient) UploadFiles(ctx context.Context, in *UploadFilesRequest, opts ...grpc.CallOption) (*UploadFilesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UploadFilesResponse)
@@ -128,7 +116,6 @@ type EventServiceServer interface {
 	DeleteEvent(context.Context, *DeleteEventRequest) (*DeleteEventResponse, error)
 	GetEvent(context.Context, *GetEventRequest) (*GetEventResponse, error)
 	GetEvents(context.Context, *GetEventsRequest) (*GetEventsResponse, error)
-	AttachFileToEvent(context.Context, *AttachFileToEventRequest) (*AttachFileToEventResponse, error)
 	UploadFiles(context.Context, *UploadFilesRequest) (*UploadFilesResponse, error)
 	mustEmbedUnimplementedEventServiceServer()
 }
@@ -154,9 +141,6 @@ func (UnimplementedEventServiceServer) GetEvent(context.Context, *GetEventReques
 }
 func (UnimplementedEventServiceServer) GetEvents(context.Context, *GetEventsRequest) (*GetEventsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetEvents not implemented")
-}
-func (UnimplementedEventServiceServer) AttachFileToEvent(context.Context, *AttachFileToEventRequest) (*AttachFileToEventResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method AttachFileToEvent not implemented")
 }
 func (UnimplementedEventServiceServer) UploadFiles(context.Context, *UploadFilesRequest) (*UploadFilesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UploadFiles not implemented")
@@ -272,24 +256,6 @@ func _EventService_GetEvents_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _EventService_AttachFileToEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AttachFileToEventRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(EventServiceServer).AttachFileToEvent(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: EventService_AttachFileToEvent_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EventServiceServer).AttachFileToEvent(ctx, req.(*AttachFileToEventRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _EventService_UploadFiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UploadFilesRequest)
 	if err := dec(in); err != nil {
@@ -334,10 +300,6 @@ var EventService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetEvents",
 			Handler:    _EventService_GetEvents_Handler,
-		},
-		{
-			MethodName: "AttachFileToEvent",
-			Handler:    _EventService_AttachFileToEvent_Handler,
 		},
 		{
 			MethodName: "UploadFiles",

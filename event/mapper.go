@@ -9,6 +9,7 @@ func eventToPB(e *Event) *pb.Event {
 	fileUrls := make([]string, 0, len(e.Files))
 
 	for _, f := range e.Files {
+
 		fileUrls = append(fileUrls, f.FileKey)
 	}
 
@@ -22,7 +23,7 @@ func eventToPB(e *Event) *pb.Event {
 		EndTime:     timestamppb.New(e.EndTime),
 		CreatedAt:   timestamppb.New(e.CreatedAt),
 		FileUrls:    fileUrls,
-		Capacity:    uint32(*e.Capacity),
+		Capacity:    capacityToPB(e.Capacity),
 	}
 }
 
@@ -50,17 +51,8 @@ func pbEventToModel(e *pb.Event) *Event {
 		StartTime:   e.StartTime.AsTime(),
 		EndTime:     e.EndTime.AsTime(),
 		CreatedAt:   e.CreatedAt.AsTime(),
-		Capacity:    uint32PtrToIntPtr(&e.Capacity),
+		Capacity:    capacityFromPB(e.Capacity),
 	}
-}
-
-func uint32PtrToIntPtr(v *uint32) *int {
-	if v == nil {
-		return nil
-	}
-
-	i := int(*v)
-	return &i
 }
 
 func eventsFromPB(events []*pb.Event) []*Event {
@@ -71,4 +63,20 @@ func eventsFromPB(events []*pb.Event) []*Event {
 	}
 
 	return result
+}
+
+func capacityToPB(c *int) uint32 {
+	if c == nil {
+		return 0
+	}
+	return uint32(*c)
+}
+
+func capacityFromPB(v uint32) *int {
+	if v == 0 {
+		return nil
+	}
+
+	i := int(v)
+	return &i
 }

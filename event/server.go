@@ -11,13 +11,12 @@ import (
 )
 
 type EventServices interface {
-	CreateEvent(ctx context.Context, name string, description string, filesURLs []string, capacity *int, startTime time.Time, endTime time.Time) (*Event, error)
+	CreateEvent(ctx context.Context, name string, description string, filesURLs []string, capacity *int, startTime time.Time, endTime time.Time, department string, createdBy string, role string) (*Event, error)
 	UpdateEvent(ctx context.Context, eventID string, updateData map[string]interface{}) (*Event, error)
 	DeleteEvent(ctx context.Context, eventID string) error
 	GetEvent(ctx context.Context, eventID string) (*Event, error)
 	GetEvents(ctx context.Context, filter EventFilter) ([]Event, error)
 	UploadFile(ctx context.Context, eventID string, fileName string, data []byte) (string, string, error)
-	AttachEventFile(ctx context.Context, eventID string, fileKeys []string) (*Event, error)
 }
 
 type serverEvent struct {
@@ -36,6 +35,25 @@ func (s *serverEvent) CreateEvent(ctx context.Context, req *pb.CreateEventReques
 		return nil, err
 	}
 
+	role, ok := ctx.Value(roleKey).(string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "role missing in context")
+	}
+
+	department, ok := ctx.Value(departmentKey).(string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "department missing in context")
+	}
+
+	createdBy, ok := ctx.Value(userIDKey).(string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "user id missing in context")
+	}
+
+	if role != "moderator" && role != "admin" {
+		return nil, status.Error(codes.PermissionDenied, "not allowed")
+	}
+
 	var capacity *int
 	if req.Capacity != nil {
 		c := int(req.GetCapacity())
@@ -50,6 +68,9 @@ func (s *serverEvent) CreateEvent(ctx context.Context, req *pb.CreateEventReques
 		capacity,
 		req.StartTime.AsTime(),
 		req.EndTime.AsTime(),
+		department,
+		createdBy,
+		role,
 	)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -68,7 +89,7 @@ func (s *serverEvent) UpdateEvent(ctx context.Context, req *pb.UpdateEventReques
 	updateData := make(map[string]interface{})
 
 	if req.GetName() != "" {
-		updateData["name"] = req.GetName()
+		updateData["event_name"] = req.GetName()
 	}
 
 	if req.GetDescription() != "" {
@@ -80,11 +101,11 @@ func (s *serverEvent) UpdateEvent(ctx context.Context, req *pb.UpdateEventReques
 	}
 
 	if req.GetStartTime() != nil {
-		updateData["start_time"] = req.StartTime
+		updateData["start_time"] = req.StartTime.AsTime()
 	}
 
 	if req.GetEndTime() != nil {
-		updateData["end_time"] = req.EndTime
+		updateData["end_time"] = req.EndTime.AsTime()
 	}
 
 	if req.GetCapacity() != 0 {
@@ -180,24 +201,6 @@ func (s *serverEvent) UploadFiles(ctx context.Context, req *pb.UploadFilesReques
 	}, nil
 }
 
-func (s *serverEvent) AttachEventFile(ctx context.Context, req *pb.AttachFileToEventRequest) (*pb.AttachFileToEventResponse, error) {
-	if err := validateAttachEventFile(req); err != nil {
-		return nil, err
-	}
-
-	updatedEvent, err := s.event.AttachEventFile(ctx, req.Id, req.FileKeys)
-	if err != nil {
-		return nil, err
-	}
-
-	var fileURLs []string
-	for _, f := range updatedEvent.Files {
-		fileURLs = append(fileURLs, f.FileKey)
-	}
-
-	return &pb.AttachFileToEventResponse{Event: eventToPB(updatedEvent)}, nil
-}
-
 func validateGetEvent(req *pb.GetEventRequest) error {
 	if req.Id == "" {
 		return status.Error(codes.InvalidArgument, "event ID is required")
@@ -215,16 +218,6 @@ func validateDeleteEvent(req *pb.DeleteEventRequest) error {
 func validateUpdateEvent(req *pb.UpdateEventRequest) error {
 	if req.Id == "" {
 		return status.Error(codes.InvalidArgument, "event ID is required")
-	}
-	return nil
-}
-
-func validateAttachEventFile(req *pb.AttachFileToEventRequest) error {
-	if req.Id == "" {
-		return status.Error(codes.InvalidArgument, "event ID is required")
-	}
-	if req.FileKeys == nil {
-		return status.Error(codes.InvalidArgument, "file keys are required")
 	}
 	return nil
 }

@@ -682,102 +682,6 @@ func (*DeleteEventResponse) Descriptor() ([]byte, []int) {
 	return file_event_proto_rawDescGZIP(), []int{10}
 }
 
-type AttachFileToEventRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	FileKeys      []string               `protobuf:"bytes,2,rep,name=file_keys,json=fileKeys,proto3" json:"file_keys,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AttachFileToEventRequest) Reset() {
-	*x = AttachFileToEventRequest{}
-	mi := &file_event_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AttachFileToEventRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AttachFileToEventRequest) ProtoMessage() {}
-
-func (x *AttachFileToEventRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_event_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AttachFileToEventRequest.ProtoReflect.Descriptor instead.
-func (*AttachFileToEventRequest) Descriptor() ([]byte, []int) {
-	return file_event_proto_rawDescGZIP(), []int{11}
-}
-
-func (x *AttachFileToEventRequest) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *AttachFileToEventRequest) GetFileKeys() []string {
-	if x != nil {
-		return x.FileKeys
-	}
-	return nil
-}
-
-type AttachFileToEventResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Event         *Event                 `protobuf:"bytes,1,opt,name=event,proto3" json:"event,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AttachFileToEventResponse) Reset() {
-	*x = AttachFileToEventResponse{}
-	mi := &file_event_proto_msgTypes[12]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AttachFileToEventResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AttachFileToEventResponse) ProtoMessage() {}
-
-func (x *AttachFileToEventResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_event_proto_msgTypes[12]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AttachFileToEventResponse.ProtoReflect.Descriptor instead.
-func (*AttachFileToEventResponse) Descriptor() ([]byte, []int) {
-	return file_event_proto_rawDescGZIP(), []int{12}
-}
-
-func (x *AttachFileToEventResponse) GetEvent() *Event {
-	if x != nil {
-		return x.Event
-	}
-	return nil
-}
-
 type FileUpload struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	FileName      string                 `protobuf:"bytes,1,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty"`
@@ -789,7 +693,7 @@ type FileUpload struct {
 
 func (x *FileUpload) Reset() {
 	*x = FileUpload{}
-	mi := &file_event_proto_msgTypes[13]
+	mi := &file_event_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -801,7 +705,7 @@ func (x *FileUpload) String() string {
 func (*FileUpload) ProtoMessage() {}
 
 func (x *FileUpload) ProtoReflect() protoreflect.Message {
-	mi := &file_event_proto_msgTypes[13]
+	mi := &file_event_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -814,7 +718,7 @@ func (x *FileUpload) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FileUpload.ProtoReflect.Descriptor instead.
 func (*FileUpload) Descriptor() ([]byte, []int) {
-	return file_event_proto_rawDescGZIP(), []int{13}
+	return file_event_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *FileUpload) GetFileName() string {
@@ -848,7 +752,7 @@ type UploadFilesRequest struct {
 
 func (x *UploadFilesRequest) Reset() {
 	*x = UploadFilesRequest{}
-	mi := &file_event_proto_msgTypes[14]
+	mi := &file_event_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -860,7 +764,7 @@ func (x *UploadFilesRequest) String() string {
 func (*UploadFilesRequest) ProtoMessage() {}
 
 func (x *UploadFilesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_event_proto_msgTypes[14]
+	mi := &file_event_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -873,7 +777,7 @@ func (x *UploadFilesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadFilesRequest.ProtoReflect.Descriptor instead.
 func (*UploadFilesRequest) Descriptor() ([]byte, []int) {
-	return file_event_proto_rawDescGZIP(), []int{14}
+	return file_event_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *UploadFilesRequest) GetId() string {
@@ -899,7 +803,7 @@ type UploadFilesResponse struct {
 
 func (x *UploadFilesResponse) Reset() {
 	*x = UploadFilesResponse{}
-	mi := &file_event_proto_msgTypes[15]
+	mi := &file_event_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -911,7 +815,7 @@ func (x *UploadFilesResponse) String() string {
 func (*UploadFilesResponse) ProtoMessage() {}
 
 func (x *UploadFilesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_event_proto_msgTypes[15]
+	mi := &file_event_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -924,7 +828,7 @@ func (x *UploadFilesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadFilesResponse.ProtoReflect.Descriptor instead.
 func (*UploadFilesResponse) Descriptor() ([]byte, []int) {
-	return file_event_proto_rawDescGZIP(), []int{15}
+	return file_event_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *UploadFilesResponse) GetFiles() []*UploadFileResponse {
@@ -944,7 +848,7 @@ type UploadFileResponse struct {
 
 func (x *UploadFileResponse) Reset() {
 	*x = UploadFileResponse{}
-	mi := &file_event_proto_msgTypes[16]
+	mi := &file_event_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -956,7 +860,7 @@ func (x *UploadFileResponse) String() string {
 func (*UploadFileResponse) ProtoMessage() {}
 
 func (x *UploadFileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_event_proto_msgTypes[16]
+	mi := &file_event_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -969,7 +873,7 @@ func (x *UploadFileResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadFileResponse.ProtoReflect.Descriptor instead.
 func (*UploadFileResponse) Descriptor() ([]byte, []int) {
-	return file_event_proto_rawDescGZIP(), []int{16}
+	return file_event_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *UploadFileResponse) GetUploadUrl() string {
@@ -1049,12 +953,7 @@ const file_event_proto_rawDesc = "" +
 	"\x06events\x18\x01 \x03(\v2\t.pb.EventR\x06events\"$\n" +
 	"\x12DeleteEventRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\x15\n" +
-	"\x13DeleteEventResponse\"G\n" +
-	"\x18AttachFileToEventRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
-	"\tfile_keys\x18\x02 \x03(\tR\bfileKeys\"<\n" +
-	"\x19AttachFileToEventResponse\x12\x1f\n" +
-	"\x05event\x18\x01 \x01(\v2\t.pb.EventR\x05event\"i\n" +
+	"\x13DeleteEventResponse\"i\n" +
 	"\n" +
 	"FileUpload\x12\x1b\n" +
 	"\tfile_name\x18\x01 \x01(\tR\bfileName\x12!\n" +
@@ -1068,14 +967,13 @@ const file_event_proto_rawDesc = "" +
 	"\x12UploadFileResponse\x12\x1d\n" +
 	"\n" +
 	"upload_url\x18\x01 \x01(\tR\tuploadUrl\x12\x19\n" +
-	"\bfile_key\x18\x02 \x01(\tR\afileKey2\xdf\x03\n" +
+	"\bfile_key\x18\x02 \x01(\tR\afileKey2\x8b\x03\n" +
 	"\fEventService\x12@\n" +
 	"\vCreateEvent\x12\x16.pb.CreateEventRequest\x1a\x17.pb.CreateEventResponse\"\x00\x12@\n" +
 	"\vUpdateEvent\x12\x16.pb.UpdateEventRequest\x1a\x17.pb.UpdateEventResponse\"\x00\x12@\n" +
 	"\vDeleteEvent\x12\x16.pb.DeleteEventRequest\x1a\x17.pb.DeleteEventResponse\"\x00\x127\n" +
 	"\bGetEvent\x12\x13.pb.GetEventRequest\x1a\x14.pb.GetEventResponse\"\x00\x12:\n" +
-	"\tGetEvents\x12\x14.pb.GetEventsRequest\x1a\x15.pb.GetEventsResponse\"\x00\x12R\n" +
-	"\x11AttachFileToEvent\x12\x1c.pb.AttachFileToEventRequest\x1a\x1d.pb.AttachFileToEventResponse\"\x00\x12@\n" +
+	"\tGetEvents\x12\x14.pb.GetEventsRequest\x1a\x15.pb.GetEventsResponse\"\x00\x12@\n" +
 	"\vUploadFiles\x12\x16.pb.UploadFilesRequest\x1a\x17.pb.UploadFilesResponse\"\x00B\x06Z\x04./pbb\x06proto3"
 
 var (
@@ -1090,61 +988,56 @@ func file_event_proto_rawDescGZIP() []byte {
 	return file_event_proto_rawDescData
 }
 
-var file_event_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
+var file_event_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_event_proto_goTypes = []any{
-	(*Event)(nil),                     // 0: pb.Event
-	(*CreateEventRequest)(nil),        // 1: pb.CreateEventRequest
-	(*CreateEventResponse)(nil),       // 2: pb.CreateEventResponse
-	(*UpdateEventRequest)(nil),        // 3: pb.UpdateEventRequest
-	(*UpdateEventResponse)(nil),       // 4: pb.UpdateEventResponse
-	(*GetEventRequest)(nil),           // 5: pb.GetEventRequest
-	(*GetEventResponse)(nil),          // 6: pb.GetEventResponse
-	(*GetEventsRequest)(nil),          // 7: pb.GetEventsRequest
-	(*GetEventsResponse)(nil),         // 8: pb.GetEventsResponse
-	(*DeleteEventRequest)(nil),        // 9: pb.DeleteEventRequest
-	(*DeleteEventResponse)(nil),       // 10: pb.DeleteEventResponse
-	(*AttachFileToEventRequest)(nil),  // 11: pb.AttachFileToEventRequest
-	(*AttachFileToEventResponse)(nil), // 12: pb.AttachFileToEventResponse
-	(*FileUpload)(nil),                // 13: pb.FileUpload
-	(*UploadFilesRequest)(nil),        // 14: pb.UploadFilesRequest
-	(*UploadFilesResponse)(nil),       // 15: pb.UploadFilesResponse
-	(*UploadFileResponse)(nil),        // 16: pb.UploadFileResponse
-	(*timestamppb.Timestamp)(nil),     // 17: google.protobuf.Timestamp
+	(*Event)(nil),                 // 0: pb.Event
+	(*CreateEventRequest)(nil),    // 1: pb.CreateEventRequest
+	(*CreateEventResponse)(nil),   // 2: pb.CreateEventResponse
+	(*UpdateEventRequest)(nil),    // 3: pb.UpdateEventRequest
+	(*UpdateEventResponse)(nil),   // 4: pb.UpdateEventResponse
+	(*GetEventRequest)(nil),       // 5: pb.GetEventRequest
+	(*GetEventResponse)(nil),      // 6: pb.GetEventResponse
+	(*GetEventsRequest)(nil),      // 7: pb.GetEventsRequest
+	(*GetEventsResponse)(nil),     // 8: pb.GetEventsResponse
+	(*DeleteEventRequest)(nil),    // 9: pb.DeleteEventRequest
+	(*DeleteEventResponse)(nil),   // 10: pb.DeleteEventResponse
+	(*FileUpload)(nil),            // 11: pb.FileUpload
+	(*UploadFilesRequest)(nil),    // 12: pb.UploadFilesRequest
+	(*UploadFilesResponse)(nil),   // 13: pb.UploadFilesResponse
+	(*UploadFileResponse)(nil),    // 14: pb.UploadFileResponse
+	(*timestamppb.Timestamp)(nil), // 15: google.protobuf.Timestamp
 }
 var file_event_proto_depIdxs = []int32{
-	17, // 0: pb.Event.start_time:type_name -> google.protobuf.Timestamp
-	17, // 1: pb.Event.end_time:type_name -> google.protobuf.Timestamp
-	17, // 2: pb.Event.created_at:type_name -> google.protobuf.Timestamp
-	17, // 3: pb.CreateEventRequest.start_time:type_name -> google.protobuf.Timestamp
-	17, // 4: pb.CreateEventRequest.end_time:type_name -> google.protobuf.Timestamp
+	15, // 0: pb.Event.start_time:type_name -> google.protobuf.Timestamp
+	15, // 1: pb.Event.end_time:type_name -> google.protobuf.Timestamp
+	15, // 2: pb.Event.created_at:type_name -> google.protobuf.Timestamp
+	15, // 3: pb.CreateEventRequest.start_time:type_name -> google.protobuf.Timestamp
+	15, // 4: pb.CreateEventRequest.end_time:type_name -> google.protobuf.Timestamp
 	0,  // 5: pb.CreateEventResponse.event:type_name -> pb.Event
-	17, // 6: pb.UpdateEventRequest.start_time:type_name -> google.protobuf.Timestamp
-	17, // 7: pb.UpdateEventRequest.end_time:type_name -> google.protobuf.Timestamp
+	15, // 6: pb.UpdateEventRequest.start_time:type_name -> google.protobuf.Timestamp
+	15, // 7: pb.UpdateEventRequest.end_time:type_name -> google.protobuf.Timestamp
 	0,  // 8: pb.UpdateEventResponse.event:type_name -> pb.Event
 	0,  // 9: pb.GetEventResponse.event:type_name -> pb.Event
 	0,  // 10: pb.GetEventsResponse.events:type_name -> pb.Event
-	0,  // 11: pb.AttachFileToEventResponse.event:type_name -> pb.Event
-	13, // 12: pb.UploadFilesRequest.files:type_name -> pb.FileUpload
-	16, // 13: pb.UploadFilesResponse.files:type_name -> pb.UploadFileResponse
-	1,  // 14: pb.EventService.CreateEvent:input_type -> pb.CreateEventRequest
-	3,  // 15: pb.EventService.UpdateEvent:input_type -> pb.UpdateEventRequest
-	9,  // 16: pb.EventService.DeleteEvent:input_type -> pb.DeleteEventRequest
-	5,  // 17: pb.EventService.GetEvent:input_type -> pb.GetEventRequest
-	7,  // 18: pb.EventService.GetEvents:input_type -> pb.GetEventsRequest
-	11, // 19: pb.EventService.AttachFileToEvent:input_type -> pb.AttachFileToEventRequest
-	14, // 20: pb.EventService.UploadFiles:input_type -> pb.UploadFilesRequest
-	2,  // 21: pb.EventService.CreateEvent:output_type -> pb.CreateEventResponse
-	4,  // 22: pb.EventService.UpdateEvent:output_type -> pb.UpdateEventResponse
-	10, // 23: pb.EventService.DeleteEvent:output_type -> pb.DeleteEventResponse
-	6,  // 24: pb.EventService.GetEvent:output_type -> pb.GetEventResponse
-	8,  // 25: pb.EventService.GetEvents:output_type -> pb.GetEventsResponse
-	12, // 26: pb.EventService.AttachFileToEvent:output_type -> pb.AttachFileToEventResponse
-	15, // 27: pb.EventService.UploadFiles:output_type -> pb.UploadFilesResponse
-	21, // [21:28] is the sub-list for method output_type
-	14, // [14:21] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	11, // 11: pb.UploadFilesRequest.files:type_name -> pb.FileUpload
+	14, // 12: pb.UploadFilesResponse.files:type_name -> pb.UploadFileResponse
+	1,  // 13: pb.EventService.CreateEvent:input_type -> pb.CreateEventRequest
+	3,  // 14: pb.EventService.UpdateEvent:input_type -> pb.UpdateEventRequest
+	9,  // 15: pb.EventService.DeleteEvent:input_type -> pb.DeleteEventRequest
+	5,  // 16: pb.EventService.GetEvent:input_type -> pb.GetEventRequest
+	7,  // 17: pb.EventService.GetEvents:input_type -> pb.GetEventsRequest
+	12, // 18: pb.EventService.UploadFiles:input_type -> pb.UploadFilesRequest
+	2,  // 19: pb.EventService.CreateEvent:output_type -> pb.CreateEventResponse
+	4,  // 20: pb.EventService.UpdateEvent:output_type -> pb.UpdateEventResponse
+	10, // 21: pb.EventService.DeleteEvent:output_type -> pb.DeleteEventResponse
+	6,  // 22: pb.EventService.GetEvent:output_type -> pb.GetEventResponse
+	8,  // 23: pb.EventService.GetEvents:output_type -> pb.GetEventsResponse
+	13, // 24: pb.EventService.UploadFiles:output_type -> pb.UploadFilesResponse
+	19, // [19:25] is the sub-list for method output_type
+	13, // [13:19] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_event_proto_init() }
@@ -1160,7 +1053,7 @@ func file_event_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_event_proto_rawDesc), len(file_event_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   17,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

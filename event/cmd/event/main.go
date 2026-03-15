@@ -58,7 +58,9 @@ func main() {
 
 	logg.Info("minio connected")
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(event.AuthInterceptor),
+	)
 	event.NewEventServer(grpcServer, service)
 
 	reflection.Register(grpcServer)

@@ -89,7 +89,7 @@ func (r *postgresRepository) CreateEvent(ctx context.Context, e *Event) error {
 }
 
 func (r *postgresRepository) DeleteEvent(ctx context.Context, eventID string) error {
-	return r.db.WithContext(ctx).Delete(&Event{}, eventID).Error
+	return r.db.WithContext(ctx).Delete(&Event{}, "id = ?", eventID).Error
 }
 
 func (r *postgresRepository) UpdateEvent(ctx context.Context, eventID string, data map[string]interface{}) (*Event, error) {
@@ -98,7 +98,7 @@ func (r *postgresRepository) UpdateEvent(ctx context.Context, eventID string, da
 	db := r.db.WithContext(ctx)
 
 	var event Event
-	if err := db.Model(&Event{}).
+	if err := db.Preload("Event", "Files").Model(&Event{}).
 		Where("id = ?", eventID).
 		Updates(data).Error; err != nil {
 
@@ -118,7 +118,7 @@ func (r *postgresRepository) GetEventByID(ctx context.Context, eventID string) (
 	const op = "event.repository.GetEventById"
 
 	var event Event
-	err := r.db.WithContext(ctx).Where("id = ?", eventID).First(&event).Error
+	err := r.db.WithContext(ctx).Preload("Files").Where("id = ?", eventID).First(&event).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			r.log.Error("event not found", slog.String("op", op), slog.String("eventID", eventID), sl.Err(err))
@@ -151,7 +151,7 @@ func (r *postgresRepository) GetEvents(ctx context.Context, filter EventFilter) 
 	db = db.Offset(int(filter.Skip)).Limit(int(filter.Take))
 
 	var events []Event
-	if err := db.Find(&events).Error; err != nil {
+	if err := db.Preload("Files").Find(&events).Error; err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -189,6 +189,6 @@ func (r *postgresRepository) GetFileImageKeys(ctx context.Context, eventID strin
 	return fileKeys, nil
 }
 
-func (r *postgresRepository) DeleteFile(ctx context.Context, fileKey string) error {
-	return r.db.WithContext(ctx).Where("file_key = ?", fileKey).Delete(&EventFile{}).Error
+func (r *postgresRepository) DeleteFile(ctx context.Context, eventID string) error {
+	return r.db.WithContext(ctx).Where("event_id = ?", eventID).Delete(&EventFile{}).Error
 }

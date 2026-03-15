@@ -85,15 +85,6 @@ message DeleteEventRequest {
 
 message DeleteEventResponse {}
 
-message AttachFileToEventRequest {
-    string id = 1;
-    repeated string file_keys = 2; 
-}
-
-message AttachFileToEventResponse {
-    Event event = 1; 
-}
-
 message FileUpload {
     string file_name = 1;
     string content_type = 2;
@@ -120,6 +111,5 @@ service EventService{
     rpc DeleteEvent (DeleteEventRequest) returns (DeleteEventResponse) {}
     rpc GetEvent (GetEventRequest) returns (GetEventResponse) {}
     rpc GetEvents (GetEventsRequest) returns (GetEventsResponse) {}
-    rpc AttachFileToEvent (AttachFileToEventRequest) returns (AttachFileToEventResponse) {}
     rpc UploadFiles (UploadFilesRequest) returns (UploadFilesResponse) {}
 }

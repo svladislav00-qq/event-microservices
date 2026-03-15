@@ -58,6 +58,7 @@ func (s *MinioStorage) DeleteFile(ctx context.Context, objectName string) error 
 	err := s.client.RemoveObject(ctx, s.bucket, objectName, minio.RemoveObjectOptions{})
 	if err != nil {
 		s.log.Error("failed to delete object", slog.String("op", op), sl.Err(err))
+		return fmt.Errorf("%s: %w", op, err)
 	}
 	return nil
 }

@@ -149,23 +149,6 @@ func (c *Client) GetEvents(ctx context.Context, filter EventFilter) ([]*Event, e
 	return eventsFromPB(r.Events), nil
 }
 
-func (c *Client) AttachEventFile(ctx context.Context, eventID string, fileKeys []string) (*Event, error) {
-	res, err := c.service.AttachFileToEvent(
-		ctx,
-		&pb.AttachFileToEventRequest{
-			Id:       eventID,
-			FileKeys: fileKeys,
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-	if res == nil || res.Event == nil {
-		return nil, fmt.Errorf("empty response")
-	}
-	return pbEventToModel(res.Event), nil
-}
-
 func (c *Client) UploadFiles(ctx context.Context, eventID string, files []*multipart.FileHeader) ([]*pb.UploadFileResponse, error) {
 	var uploads []*pb.FileUpload
 
