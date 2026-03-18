@@ -27,6 +27,7 @@ service AuthService {
     rpc Login (LoginRequest) returns (LoginResponse){}
     rpc PromoteToModerator (PromoteToModeratorRequest) returns (PromoteToModeratorResponse){}
     rpc GetMe (GetMeRequest) returns (GetMeResponse) {}
+    rpc GetUsersByIDs(GetUsersByIDsRequest) returns (GetUsersByIDsResponse) {}
 }
 
 message RegisterRequest {
@@ -62,4 +63,17 @@ message GetMeRequest {}
 
 message GetMeResponse{
     Account account = 1;
+}
+
+message GetUsersByIDsRequest {
+    repeated string user_ids = 1;
+}
+
+message GetUsersByIDsResponse {
+    repeated User users = 1;
+}
+
+message User {
+    string id = 1;
+    string name =2;
 }

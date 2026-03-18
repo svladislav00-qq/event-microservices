@@ -11,6 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/segmentio/ksuid"
 	"github.com/svladislav00-qq/event-microservices/pkg/logger/sl"
+	"github.com/svladislav00-qq/event-microservices/pkg/models"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -39,6 +40,7 @@ type UserProvider interface {
 	GetAccountById(ctx context.Context, id string) (*Account, error)
 	PromoteToModerator(ctx context.Context, userID string, departmentId string) error
 	GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error)
+	GetUsersByIDs(ctx context.Context, ids []string) ([]models.Account, error)
 }
 
 type Account struct {
@@ -192,4 +194,36 @@ func (a *Auth) GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Acc
 	}
 
 	return res, nil
+}
+
+func (a *Auth) GetAccountById(ctx context.Context, userID string) (*Account, error) {
+	const op = "auth.service.GetAccountById"
+
+	log := a.log.With("op", op, "user_id", userID)
+
+	acc, err := a.usrProvider.GetAccountById(ctx, userID)
+	if err != nil {
+		log.Error("failed to get account", "error", err)
+		return nil, err
+	}
+
+	return acc, nil
+}
+
+func (a *Auth) GetUsersByIDs(ctx context.Context, ids []string) ([]models.Account, error) {
+	const op = "auth.service.GetUsersByIDs"
+
+	log := a.log.With(
+		slog.String("op", op),
+	)
+
+	log.Info("getting accounts by ids")
+
+	accounts, err := a.usrProvider.GetUsersByIDs(ctx, ids)
+	if err != nil {
+		log.Error("failed to get accounts by ids", sl.Err(err))
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return accounts, nil
 }
