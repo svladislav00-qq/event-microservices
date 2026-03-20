@@ -10,6 +10,7 @@ import (
 	"github.com/segmentio/ksuid"
 	"github.com/svladislav00-qq/event-microservices/pkg/logger/sl"
 	"github.com/svladislav00-qq/event-microservices/pkg/models"
+	"google.golang.org/grpc/metadata"
 )
 
 type AttendeeService struct {
@@ -152,7 +153,14 @@ func (a *AttendeeService) ExportAttendeesTable(ctx context.Context, eventID stri
 		return []string{}, nil
 	}
 
-	users, err := a.userProvider.GetUsersByIDs(ctx, userIDs)
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("no metadata")
+	}
+
+	outCtx := metadata.NewOutgoingContext(ctx, md)
+
+	users, err := a.userProvider.GetUsersByIDs(outCtx, userIDs)
 	if err != nil {
 		log.Error("failed  to get accounts", sl.Err(err))
 		return nil, fmt.Errorf("%s: %w", op, err)

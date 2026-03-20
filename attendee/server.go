@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/svladislav00-qq/event-microservices/attendee/pb"
+	"github.com/svladislav00-qq/event-microservices/auth"
 	"github.com/xuri/excelize/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -24,17 +25,16 @@ type AttendeeServices interface {
 
 type serverAttendee struct {
 	pb.UnimplementedAttendeeServiceServer
-	attendee *AttendeeService
+	attendee   AttendeeServices
+	authClient *auth.Client
 }
 
-func NewServer(gRPC *grpc.Server, attendee *AttendeeService) *serverAttendee {
-	return &serverAttendee{
-		attendee: attendee,
-	}
+func NewServer(gRPC *grpc.Server, attendee AttendeeServices) {
+	pb.RegisterAttendeeServiceServer(gRPC, &serverAttendee{attendee: attendee})
 }
 
 func (s *serverAttendee) RegisterToEvent(ctx context.Context, req *pb.RegisterToEventRequest) (*pb.RegisterToEventResponse, error) {
-	userID, ok := ctx.Value("userID").(string)
+	userID, ok := ctx.Value(userIDKey).(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "unauthorized")
 	}
@@ -57,7 +57,7 @@ func (s *serverAttendee) RegisterToEvent(ctx context.Context, req *pb.RegisterTo
 }
 
 func (s *serverAttendee) CancelRegistration(ctx context.Context, req *pb.CancelRegistrationRequest) (*pb.CancelRegistrationResponse, error) {
-	userID, ok := ctx.Value("userID").(string)
+	userID, ok := ctx.Value(userIDKey).(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "unauthorized")
 	}
@@ -75,7 +75,7 @@ func (s *serverAttendee) CancelRegistration(ctx context.Context, req *pb.CancelR
 }
 
 func (s *serverAttendee) GetUserRegistrations(ctx context.Context, req *pb.GetUserRegistrationsRequest) (*pb.GetUserRegistrationsResponse, error) {
-	userID, ok := ctx.Value("userID").(string)
+	userID, ok := ctx.Value(userIDKey).(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "unauthorized")
 	}

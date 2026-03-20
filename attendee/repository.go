@@ -83,7 +83,7 @@ func (r *postgresRepository) RegisterToEvent(ctx context.Context, a Attendee) er
 func (r *postgresRepository) CancelRegistration(ctx context.Context, userID string, eventID string) error {
 	const op = "attendee.repository.CancelRegistration"
 
-	result := r.db.WithContext(ctx).Where("user_id = ? AND event_id = ? AND status = ?", userID, eventID, StatusRegistered).Update("status", StatusCanceled)
+	result := r.db.WithContext(ctx).Model(&Attendee{}).Where("user_id = ? AND event_id = ? AND status = ?", userID, eventID, StatusRegistered).Update("status", StatusCanceled)
 	if result.Error != nil {
 		r.log.Error("failed to cancel registration", slog.String("op", op), slog.String("event id", eventID), sl.Err(result.Error))
 		return fmt.Errorf("%s: %w", op, result.Error)
@@ -208,7 +208,7 @@ func (r *postgresRepository) GetRegisteredUserIDsByEvent(ctx context.Context, ev
 	const op = "attendee.repository.GetRegisteredUserIDsByEvent"
 
 	var userIDs []string
-	err := r.db.WithContext(ctx).Select([]string{"user_id"}).Where("event_id = ? AND status = ?", eventID, StatusRegistered).Pluck("user_id", &userIDs).Error
+	err := r.db.WithContext(ctx).Model(&Attendee{}).Where("event_id = ? AND status = ?", eventID, StatusRegistered).Pluck("user_id", &userIDs).Error
 	if err != nil {
 		slog.Error("failed to get userIDs",
 			slog.String("op", op),

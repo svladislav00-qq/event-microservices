@@ -24,7 +24,3 @@ type AttendeeFilter struct {
 	Status string
 }
 
-type Account struct {
-	ID       string
-	Username string
-}
