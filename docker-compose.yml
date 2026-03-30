@@ -1,0 +1,11 @@
+version: '3.7'
+
+services:
+  auth:
+  event:
+  attendee:
+  graphql:
+  auth_db:
+  event_db:
+  attendee_db:
+  minio:

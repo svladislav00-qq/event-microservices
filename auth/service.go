@@ -55,10 +55,6 @@ type Account struct {
 	DeletedAt    gorm.DeletedAt `json:"deleted_at"`
 }
 
-var (
-	ErrInvalidCredentials = errors.New("invalid credentials")
-)
-
 func New(log *slog.Logger, userSaver UserSaver, userProvider UserProvider, tokenTTL time.Duration) *Auth {
 	return &Auth{
 		usrSaver:    userSaver,
@@ -100,7 +96,7 @@ func (a *Auth) Register(ctx context.Context, email, password, username string) (
 	if err := a.usrSaver.PostAccount(ctx, *res); err != nil {
 		if errors.Is(err, ErrUserExists) {
 			log.Warn("user already exists", sl.Err(err))
-			return nil, fmt.Errorf("%s: %w", op, err)
+			return nil, ErrUserExists
 		}
 		log.Error("failed to save user", sl.Err(err))
 		return nil, fmt.Errorf("%s: %w", op, err)
@@ -123,7 +119,7 @@ func (a *Auth) Login(ctx context.Context, email, password string) (string, error
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
 			log.Warn("user not found", sl.Err(err))
-			return "", fmt.Errorf("%s: %w", op, ErrUserNotFound)
+			return "", ErrInvalidCredentials
 		}
 		log.Error("failed to get user", sl.Err(err))
 		return "", fmt.Errorf("%s: %w", op, err)
@@ -132,7 +128,7 @@ func (a *Auth) Login(ctx context.Context, email, password string) (string, error
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 	if err != nil {
 		log.Info("invalid credentials", sl.Err(err))
-		return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		return "", ErrInvalidCredentials
 	}
 
 	log.Info("user logged successfully")
