@@ -7,6 +7,7 @@ import (
 	"github.com/svladislav00-qq/event-microservices/auth/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 )
 
 type Client struct {
@@ -87,4 +88,14 @@ func (c *Client) PromoteToModerator(ctx context.Context, userID string, departme
 		Department: acc.DepartmentId,
 		CreatedAt:  acc.CreatedAt.AsTime(),
 	}, nil
+}
+
+func (c *Client) GetMe(ctx context.Context, token string) (*pb.GetMeResponse, error) {
+	md := metadata.New(map[string]string{
+		"authorization": "Bearer " + token,
+	})
+
+	ctx = metadata.NewOutgoingContext(ctx, md)
+
+	return c.conn.GetMe(ctx, &pb.GetMeRequest{})
 }
