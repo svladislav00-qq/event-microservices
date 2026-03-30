@@ -11,6 +11,7 @@ import (
 	"github.com/svladislav00-qq/event-microservices/pkg/logger"
 	"github.com/tinrab/retry"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type Config struct {
@@ -39,8 +40,15 @@ func main() {
 	logg.Info("database connected")
 
 	service := auth.New(logg, repo, repo, time.Hour)
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(auth.AuthInterceptor),
+	)
 	auth.NewAuthServer(grpcServer, service)
+
+	logg.Info("AUTH VERSION: NEW BUILD WITH GetUsersByIDs")
+	logg.Info("starting application", slog.Int("port", cfg.GRPCPort))
+
+	reflection.Register(grpcServer)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.GRPCPort))
 	if err != nil {

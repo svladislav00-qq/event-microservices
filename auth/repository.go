@@ -8,6 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/svladislav00-qq/event-microservices/pkg/logger/sl"
+	"github.com/svladislav00-qq/event-microservices/pkg/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -19,6 +20,7 @@ type Repository interface {
 	GetAccountByEmail(ctx context.Context, email string) (*Account, error)
 	GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error)
 	PromoteToModerator(ctx context.Context, userID string, departmentId string) error
+	GetUsersByIDs(ctx context.Context, ids []string) ([]models.Account, error)
 }
 
 type postgresRepository struct {
@@ -147,15 +149,15 @@ func (r *postgresRepository) PromoteToModerator(ctx context.Context, userID stri
 	const op = "auth.repository.PromoteToModerator"
 
 	err := r.db.WithContext(ctx).Model(&Account{}).Where("id = ?", userID).Updates(map[string]interface{}{
-		"role":          "moderator",
-		"department_id": departmentId,
+		"role":       "moderator",
+		"department": departmentId,
 	}).Error
 
 	if err != nil {
 		r.log.Error("failed to promote user to moderator",
 			slog.String("op", op),
 			slog.String("user_id", userID),
-			slog.String("department_id", departmentId),
+			slog.String("department", departmentId),
 			sl.Err(err),
 		)
 		return fmt.Errorf("%s: %w", op, err)
@@ -166,4 +168,16 @@ func (r *postgresRepository) PromoteToModerator(ctx context.Context, userID stri
 func isDuplicate(err error) bool {
 	var pgErr *pgconn.PgError
 	return errors.As(err, &pgErr) && pgErr.Code == "23505"
+func (r *postgresRepository) GetUsersByIDs(ctx context.Context, ids []string) ([]models.Account, error) {
+	const op = "auth.repository.GetUsersByIDs"
+
+	var accounts []models.Account
+
+	err := r.db.WithContext(ctx).Where("id IN ?", ids).Find(&accounts).Error
+	if err != nil {
+		r.log.Error("failed to get accounts by ids", slog.String("op", op), sl.Err(err))
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return accounts, nil
 }

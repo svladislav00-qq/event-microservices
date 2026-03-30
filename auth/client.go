@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/svladislav00-qq/event-microservices/auth/pb"
+	"github.com/svladislav00-qq/event-microservices/pkg/models"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
@@ -69,8 +70,8 @@ func (c *Client) Login(ctx context.Context, email, password string) (string, err
 
 func (c *Client) PromoteToModerator(ctx context.Context, userID string, departmentID string) (*Account, error) {
 	r, err := c.service.PromoteToModerator(ctx, &pb.PromoteToModeratorRequest{
-		UserId:       userID,
-		DepartmentId: departmentID,
+		UserId:     userID,
+		Department: departmentID,
 	})
 	if err != nil {
 		return nil, err
@@ -85,7 +86,7 @@ func (c *Client) PromoteToModerator(ctx context.Context, userID string, departme
 		Email:      acc.Email,
 		Username:   acc.Username,
 		Role:       acc.Role.String(),
-		Department: acc.DepartmentId,
+		Department: acc.Department,
 		CreatedAt:  acc.CreatedAt.AsTime(),
 	}, nil
 }
@@ -98,4 +99,22 @@ func (c *Client) GetMe(ctx context.Context, token string) (*pb.GetMeResponse, er
 	ctx = metadata.NewOutgoingContext(ctx, md)
 
 	return c.conn.GetMe(ctx, &pb.GetMeRequest{})
+func (c *Client) GetUsersByIDs(ctx context.Context, ids []string) ([]models.Account, error) {
+	resp, err := c.service.GetUsersByIDs(ctx, &pb.GetUsersByIDsRequest{
+		UserIds: ids,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	accounts := make([]models.Account, 0, len(resp.Users))
+
+	for _, a := range resp.Users {
+		accounts = append(accounts, models.Account{
+			ID:       a.Id,
+			Username: a.Name,
+		})
+	}
+
+	return accounts, nil
 }

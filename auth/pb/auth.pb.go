@@ -80,7 +80,7 @@ type Account struct {
 	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	Username      string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
 	Role          Role                   `protobuf:"varint,4,opt,name=role,proto3,enum=pb.Role" json:"role,omitempty"`
-	DepartmentId  string                 `protobuf:"bytes,5,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	Department    string                 `protobuf:"bytes,5,opt,name=department,proto3" json:"department,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -144,9 +144,9 @@ func (x *Account) GetRole() Role {
 	return Role_ROLE_UNSPECIFIED
 }
 
-func (x *Account) GetDepartmentId() string {
+func (x *Account) GetDepartment() string {
 	if x != nil {
-		return x.DepartmentId
+		return x.Department
 	}
 	return ""
 }
@@ -361,7 +361,7 @@ func (x *LoginResponse) GetToken() string {
 type PromoteToModeratorRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	DepartmentId  string                 `protobuf:"bytes,2,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	Department    string                 `protobuf:"bytes,2,opt,name=department,proto3" json:"department,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -403,9 +403,9 @@ func (x *PromoteToModeratorRequest) GetUserId() string {
 	return ""
 }
 
-func (x *PromoteToModeratorRequest) GetDepartmentId() string {
+func (x *PromoteToModeratorRequest) GetDepartment() string {
 	if x != nil {
-		return x.DepartmentId
+		return x.Department
 	}
 	return ""
 }
@@ -534,18 +534,160 @@ func (x *GetMeResponse) GetAccount() *Account {
 	return nil
 }
 
+type GetUsersByIDsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserIds       []string               `protobuf:"bytes,1,rep,name=user_ids,json=userIds,proto3" json:"user_ids,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUsersByIDsRequest) Reset() {
+	*x = GetUsersByIDsRequest{}
+	mi := &file_auth_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUsersByIDsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUsersByIDsRequest) ProtoMessage() {}
+
+func (x *GetUsersByIDsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUsersByIDsRequest.ProtoReflect.Descriptor instead.
+func (*GetUsersByIDsRequest) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetUsersByIDsRequest) GetUserIds() []string {
+	if x != nil {
+		return x.UserIds
+	}
+	return nil
+}
+
+type GetUsersByIDsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Users         []*User                `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUsersByIDsResponse) Reset() {
+	*x = GetUsersByIDsResponse{}
+	mi := &file_auth_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUsersByIDsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUsersByIDsResponse) ProtoMessage() {}
+
+func (x *GetUsersByIDsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUsersByIDsResponse.ProtoReflect.Descriptor instead.
+func (*GetUsersByIDsResponse) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GetUsersByIDsResponse) GetUsers() []*User {
+	if x != nil {
+		return x.Users
+	}
+	return nil
+}
+
+type User struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *User) Reset() {
+	*x = User{}
+	mi := &file_auth_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *User) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*User) ProtoMessage() {}
+
+func (x *User) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use User.ProtoReflect.Descriptor instead.
+func (*User) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *User) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *User) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
 var File_auth_proto protoreflect.FileDescriptor
 
 const file_auth_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"auth.proto\x12\x02pb\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc9\x01\n" +
+	"auth.proto\x12\x02pb\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc4\x01\n" +
 	"\aAccount\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
 	"\busername\x18\x03 \x01(\tR\busername\x12\x1c\n" +
-	"\x04role\x18\x04 \x01(\x0e2\b.pb.RoleR\x04role\x12#\n" +
-	"\rdepartment_id\x18\x05 \x01(\tR\fdepartmentId\x129\n" +
+	"\x04role\x18\x04 \x01(\x0e2\b.pb.RoleR\x04role\x12\x1e\n" +
+	"\n" +
+	"department\x18\x05 \x01(\tR\n" +
+	"department\x129\n" +
 	"\n" +
 	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"_\n" +
 	"\x0fRegisterRequest\x12\x14\n" +
@@ -558,26 +700,36 @@ const file_auth_proto_rawDesc = "" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"%\n" +
 	"\rLoginResponse\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05token\"Y\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\"T\n" +
 	"\x19PromoteToModeratorRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12#\n" +
-	"\rdepartment_id\x18\x02 \x01(\tR\fdepartmentId\"C\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1e\n" +
+	"\n" +
+	"department\x18\x02 \x01(\tR\n" +
+	"department\"C\n" +
 	"\x1aPromoteToModeratorResponse\x12%\n" +
 	"\aaccount\x18\x01 \x01(\v2\v.pb.AccountR\aaccount\"\x0e\n" +
 	"\fGetMeRequest\"6\n" +
 	"\rGetMeResponse\x12%\n" +
-	"\aaccount\x18\x01 \x01(\v2\v.pb.AccountR\aaccount*O\n" +
+	"\aaccount\x18\x01 \x01(\v2\v.pb.AccountR\aaccount\"1\n" +
+	"\x14GetUsersByIDsRequest\x12\x19\n" +
+	"\buser_ids\x18\x01 \x03(\tR\auserIds\"7\n" +
+	"\x15GetUsersByIDsResponse\x12\x1e\n" +
+	"\x05users\x18\x01 \x03(\v2\b.pb.UserR\x05users\"*\n" +
+	"\x04User\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name*O\n" +
 	"\x04Role\x12\x14\n" +
 	"\x10ROLE_UNSPECIFIED\x10\x00\x12\r\n" +
 	"\tROLE_USER\x10\x01\x12\x12\n" +
 	"\x0eROLE_MODERATOR\x10\x02\x12\x0e\n" +
 	"\n" +
-	"ROLE_ADMIN\x10\x032\xfd\x01\n" +
+	"ROLE_ADMIN\x10\x032\xc5\x02\n" +
 	"\vAuthService\x127\n" +
 	"\bRegister\x12\x13.pb.RegisterRequest\x1a\x14.pb.RegisterResponse\"\x00\x12.\n" +
 	"\x05Login\x12\x10.pb.LoginRequest\x1a\x11.pb.LoginResponse\"\x00\x12U\n" +
 	"\x12PromoteToModerator\x12\x1d.pb.PromoteToModeratorRequest\x1a\x1e.pb.PromoteToModeratorResponse\"\x00\x12.\n" +
-	"\x05GetMe\x12\x10.pb.GetMeRequest\x1a\x11.pb.GetMeResponse\"\x00B\x06Z\x04./pbb\x06proto3"
+	"\x05GetMe\x12\x10.pb.GetMeRequest\x1a\x11.pb.GetMeResponse\"\x00\x12F\n" +
+	"\rGetUsersByIDs\x12\x18.pb.GetUsersByIDsRequest\x1a\x19.pb.GetUsersByIDsResponse\"\x00B\x06Z\x04./pbb\x06proto3"
 
 var (
 	file_auth_proto_rawDescOnce sync.Once
@@ -592,7 +744,7 @@ func file_auth_proto_rawDescGZIP() []byte {
 }
 
 var file_auth_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_auth_proto_goTypes = []any{
 	(Role)(0),                          // 0: pb.Role
 	(*Account)(nil),                    // 1: pb.Account
@@ -604,27 +756,33 @@ var file_auth_proto_goTypes = []any{
 	(*PromoteToModeratorResponse)(nil), // 7: pb.PromoteToModeratorResponse
 	(*GetMeRequest)(nil),               // 8: pb.GetMeRequest
 	(*GetMeResponse)(nil),              // 9: pb.GetMeResponse
-	(*timestamppb.Timestamp)(nil),      // 10: google.protobuf.Timestamp
+	(*GetUsersByIDsRequest)(nil),       // 10: pb.GetUsersByIDsRequest
+	(*GetUsersByIDsResponse)(nil),      // 11: pb.GetUsersByIDsResponse
+	(*User)(nil),                       // 12: pb.User
+	(*timestamppb.Timestamp)(nil),      // 13: google.protobuf.Timestamp
 }
 var file_auth_proto_depIdxs = []int32{
 	0,  // 0: pb.Account.role:type_name -> pb.Role
-	10, // 1: pb.Account.created_at:type_name -> google.protobuf.Timestamp
+	13, // 1: pb.Account.created_at:type_name -> google.protobuf.Timestamp
 	1,  // 2: pb.RegisterResponse.account:type_name -> pb.Account
 	1,  // 3: pb.PromoteToModeratorResponse.account:type_name -> pb.Account
 	1,  // 4: pb.GetMeResponse.account:type_name -> pb.Account
-	2,  // 5: pb.AuthService.Register:input_type -> pb.RegisterRequest
-	4,  // 6: pb.AuthService.Login:input_type -> pb.LoginRequest
-	6,  // 7: pb.AuthService.PromoteToModerator:input_type -> pb.PromoteToModeratorRequest
-	8,  // 8: pb.AuthService.GetMe:input_type -> pb.GetMeRequest
-	3,  // 9: pb.AuthService.Register:output_type -> pb.RegisterResponse
-	5,  // 10: pb.AuthService.Login:output_type -> pb.LoginResponse
-	7,  // 11: pb.AuthService.PromoteToModerator:output_type -> pb.PromoteToModeratorResponse
-	9,  // 12: pb.AuthService.GetMe:output_type -> pb.GetMeResponse
-	9,  // [9:13] is the sub-list for method output_type
-	5,  // [5:9] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	12, // 5: pb.GetUsersByIDsResponse.users:type_name -> pb.User
+	2,  // 6: pb.AuthService.Register:input_type -> pb.RegisterRequest
+	4,  // 7: pb.AuthService.Login:input_type -> pb.LoginRequest
+	6,  // 8: pb.AuthService.PromoteToModerator:input_type -> pb.PromoteToModeratorRequest
+	8,  // 9: pb.AuthService.GetMe:input_type -> pb.GetMeRequest
+	10, // 10: pb.AuthService.GetUsersByIDs:input_type -> pb.GetUsersByIDsRequest
+	3,  // 11: pb.AuthService.Register:output_type -> pb.RegisterResponse
+	5,  // 12: pb.AuthService.Login:output_type -> pb.LoginResponse
+	7,  // 13: pb.AuthService.PromoteToModerator:output_type -> pb.PromoteToModeratorResponse
+	9,  // 14: pb.AuthService.GetMe:output_type -> pb.GetMeResponse
+	11, // 15: pb.AuthService.GetUsersByIDs:output_type -> pb.GetUsersByIDsResponse
+	11, // [11:16] is the sub-list for method output_type
+	6,  // [6:11] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_auth_proto_init() }
@@ -638,7 +796,7 @@ func file_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_auth_proto_rawDesc), len(file_auth_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   9,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

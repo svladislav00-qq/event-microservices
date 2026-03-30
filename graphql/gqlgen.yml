@@ -1,9 +1,15 @@
-schema: 
+schema:
   - schema.graphql
 
-models:
-  Account:
-    model: github.com/svladislav00-qq/event-microservices/graphql.Account
-    fields:
-      orders:
-        resolver: true
+exec:
+  filename: generated.go
+  package: graphql
+
+model:
+  filename: models_gen.go
+  package: graphql
+
+resolver:
+  layout: follow-schema
+  dir: .
+  package: graphql

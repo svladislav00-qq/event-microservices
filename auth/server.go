@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/svladislav00-qq/event-microservices/auth/pb"
+	"github.com/svladislav00-qq/event-microservices/pkg/models"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -17,6 +18,7 @@ type AuthService interface {
 	PromoteToModerator(ctx context.Context, userID string, departmentId string) (*Account, error)
 	GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error)
 	GetAccountById(ctx context.Context, userID string) (*Account, error)
+	GetUsersByIDs(ctx context.Context, ids []string) ([]models.Account, error)
 }
 
 type serverAuth struct {
@@ -71,23 +73,23 @@ func (s *serverAuth) PromoteToModerator(ctx context.Context, req *pb.PromoteToMo
 		return nil, err
 	}
 
-	account, err := s.auth.PromoteToModerator(ctx, req.UserId, req.DepartmentId)
+	account, err := s.auth.PromoteToModerator(ctx, req.UserId, req.Department)
 	if err != nil {
 		return nil, err
 	}
 
 	return &pb.PromoteToModeratorResponse{Account: &pb.Account{
-		Id:           account.ID,
-		Email:        account.Email,
-		Username:     account.Username,
-		Role:         roleToProto(account.Role),
-		DepartmentId: account.Department,
-		CreatedAt:    timestamppb.New(account.CreatedAt),
+		Id:         account.ID,
+		Email:      account.Email,
+		Username:   account.Username,
+		Role:       roleToProto(account.Role),
+		Department: account.Department,
+		CreatedAt:  timestamppb.New(account.CreatedAt),
 	}}, nil
 }
 
 func (s *serverAuth) GetMe(ctx context.Context, req *pb.GetMeRequest) (*pb.GetMeResponse, error) {
-	userID, ok := ctx.Value("user_id").(string)
+	userID, ok := ctx.Value(userIDKey).(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "user not authenticated")
 	}
@@ -108,6 +110,25 @@ func (s *serverAuth) GetMe(ctx context.Context, req *pb.GetMeRequest) (*pb.GetMe
 			Role:      roleToProto(account.Role),
 			CreatedAt: timestamppb.New(account.CreatedAt),
 		},
+	}, nil
+}
+
+func (s *serverAuth) GetUsersByIDs(ctx context.Context, req *pb.GetUsersByIDsRequest) (*pb.GetUsersByIDsResponse, error) {
+	accounts, err := s.auth.GetUsersByIDs(ctx, req.UserIds)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get users: %v", err)
+	}
+
+	var users []*pb.User
+	for _, acc := range accounts {
+		users = append(users, &pb.User{
+			Id:   acc.ID,
+			Name: acc.Username,
+		})
+	}
+
+	return &pb.GetUsersByIDsResponse{
+		Users: users,
 	}, nil
 }
 
@@ -142,7 +163,7 @@ func validatePromoteToModerator(req *pb.PromoteToModeratorRequest) error {
 	if req.GetUserId() == "" {
 		return status.Error(codes.InvalidArgument, "userID is required")
 	}
-	if req.GetDepartmentId() == "" {
+	if req.GetDepartment() == "" {
 		return status.Error(codes.InvalidArgument, "departmentID is required")
 	}
 	return nil
@@ -157,18 +178,4 @@ func roleToProto(role string) pb.Role {
 	default:
 		return pb.Role_ROLE_USER
 	}
-}
-
-func (a *Auth) GetAccountById(ctx context.Context, userID string) (*Account, error) {
-	const op = "auth.service.GetAccountById"
-
-	log := a.log.With("op", op, "user_id", userID)
-
-	acc, err := a.usrProvider.GetAccountById(ctx, userID)
-	if err != nil {
-		log.Error("failed to get account", "error", err)
-		return nil, err
-	}
-
-	return acc, nil
 }

@@ -13,14 +13,15 @@ import (
 
 var MinioClient *minio.Client
 var MinioBucket string
+var MinioPublicURL string
 
 func CreateCloud() {
 	ctx := context.Background()
 
-	endpoint := os.Getenv("ENDPOINT")
-	accessKeyID := os.Getenv("ACCESS_KEY_ID")
-	secretAccessKeyID := os.Getenv("SECRET_ACCESS_KEY_ID")
-	useSSL, _ := strconv.ParseBool("USE_SSL")
+	endpoint := os.Getenv("MINIO_ENDPOINT")
+	accessKeyID := os.Getenv("MINIO_ACCESS_KEY")
+	secretAccessKeyID := os.Getenv("MINIO_SECRET_KEY")
+	useSSL, _ := strconv.ParseBool(os.Getenv("MINIO_USE_SSL"))
 
 	client, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKeyID, ""),
@@ -33,8 +34,10 @@ func CreateCloud() {
 	fmt.Println("Connected to MinIO")
 
 	MinioClient = client
-	bucket := os.Getenv("BUCKET")
+	bucket := os.Getenv("MINIO_BUCKET")
 	MinioBucket = bucket
+	MinioPublicURL = os.Getenv("MINIO_PUBLIC_URL")
+
 	location := os.Getenv("LOCATION")
 
 	err = MinioClient.MakeBucket(ctx, bucket, minio.MakeBucketOptions{Region: location})

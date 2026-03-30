@@ -11,6 +11,7 @@ COPY vendor ./vendor
 
 # исходники
 COPY auth ./auth
+COPY event ./event
 
 # сборка
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \

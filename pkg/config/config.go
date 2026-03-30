@@ -29,10 +29,11 @@ func MustLoad() Config {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 
 	return Config{
-		GRPCPort:    grpcPort,
-		Env:         os.Getenv("ENV"),
-		DatabaseURL: os.Getenv("DATABASE_URL"),
-		Port:        port,
-		JWTSecret:   os.Getenv("JWT_SECRET"),
+		GRPCPort:        grpcPort,
+		Env:             os.Getenv("ENV"),
+		DatabaseURL:     os.Getenv("DATABASE_URL"),
+		Port:            port,
+		JWTSecret:       os.Getenv("JWT_SECRET"),
+		AuthGRPCAddress: os.Getenv("AUTH_GRPC_ADDRESS"),
 	}
 }
