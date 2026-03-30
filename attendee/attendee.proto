@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./pb";
+
+import "google/protobuf/timestamp.proto";
+
+enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_REGISTERED = 1;
+    STATUS_CANCELED = 2;
+}
+
+message Attendee {
+    string id = 1;
+    string event_id = 2;
+    string user_id = 3;
+    Status status = 4;
+    google.protobuf.Timestamp registered_at = 5;
+}
+
+message MyEvent {
+    string event_id = 1;
+    Status status = 2;
+    google.protobuf.Timestamp registered_at = 3;
+}
+
+service AttendeeService {
+    rpc RegisterToEvent (RegisterToEventRequest) returns (RegisterToEventResponse){}
+    rpc CancelRegistration (CancelRegistrationRequest) returns (CancelRegistrationResponse){}
+    rpc GetUserRegistrations (GetUserRegistrationsRequest) returns (GetUserRegistrationsResponse){}
+    rpc GetEventAttendees (GetEventAttendeesRequest) returns (GetEventAttendeesResponse){}
+    rpc ExportAttendeesTable (ExportAttendeeTableRequest) returns (ExportAttendeeTableResponse){}
+}
+
+message RegisterToEventRequest {
+    string event_id = 1;
+    string user_id = 2;
+}
+
+message RegisterToEventResponse {
+    Attendee attendee = 1;
+}
+
+message CancelRegistrationRequest {
+    string event_id = 1;
+    string user_id = 2;
+}
+
+message CancelRegistrationResponse {}
+
+message GetUserRegistrationsRequest {
+    uint64 skip = 1;
+    uint64 take = 2;
+    string user_id = 3;
+}
+
+message GetUserRegistrationsResponse {
+    repeated MyEvent events = 1;
+}
+
+message GetEventAttendeesRequest {
+    uint64 skip = 1;
+    uint64 take = 2;
+    string event_id = 3;
+}
+
+message GetEventAttendeesResponse {
+    repeated Attendee attendees = 1;
+}
+
+message ExportAttendeeTableRequest {
+    string event_id = 1;
+}
+
+message ExportAttendeeTableResponse {
+    bytes file = 1;
+    string filename = 2;
+}

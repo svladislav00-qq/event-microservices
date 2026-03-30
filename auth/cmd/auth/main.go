@@ -45,6 +45,9 @@ func main() {
 	)
 	auth.NewAuthServer(grpcServer, service)
 
+	logg.Info("AUTH VERSION: NEW BUILD WITH GetUsersByIDs")
+	logg.Info("starting application", slog.Int("port", cfg.GRPCPort))
+
 	reflection.Register(grpcServer)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.GRPCPort))

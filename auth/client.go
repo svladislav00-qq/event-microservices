@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/svladislav00-qq/event-microservices/auth/pb"
+	"github.com/svladislav00-qq/event-microservices/pkg/models"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -87,4 +88,24 @@ func (c *Client) PromoteToModerator(ctx context.Context, userID string, departme
 		Department: acc.Department,
 		CreatedAt:  acc.CreatedAt.AsTime(),
 	}, nil
+}
+
+func (c *Client) GetUsersByIDs(ctx context.Context, ids []string) ([]models.Account, error) {
+	resp, err := c.service.GetUsersByIDs(ctx, &pb.GetUsersByIDsRequest{
+		UserIds: ids,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	accounts := make([]models.Account, 0, len(resp.Users))
+
+	for _, a := range resp.Users {
+		accounts = append(accounts, models.Account{
+			ID:       a.Id,
+			Username: a.Name,
+		})
+	}
+
+	return accounts, nil
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/svladislav00-qq/event-microservices/auth/pb"
+	"github.com/svladislav00-qq/event-microservices/pkg/models"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -17,6 +18,7 @@ type AuthService interface {
 	PromoteToModerator(ctx context.Context, userID string, departmentId string) (*Account, error)
 	GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error)
 	GetAccountById(ctx context.Context, userID string) (*Account, error)
+	GetUsersByIDs(ctx context.Context, ids []string) ([]models.Account, error)
 }
 
 type serverAuth struct {
@@ -108,6 +110,25 @@ func (s *serverAuth) GetMe(ctx context.Context, req *pb.GetMeRequest) (*pb.GetMe
 	}, nil
 }
 
+func (s *serverAuth) GetUsersByIDs(ctx context.Context, req *pb.GetUsersByIDsRequest) (*pb.GetUsersByIDsResponse, error) {
+	accounts, err := s.auth.GetUsersByIDs(ctx, req.UserIds)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get users: %v", err)
+	}
+
+	var users []*pb.User
+	for _, acc := range accounts {
+		users = append(users, &pb.User{
+			Id:   acc.ID,
+			Name: acc.Username,
+		})
+	}
+
+	return &pb.GetUsersByIDsResponse{
+		Users: users,
+	}, nil
+}
+
 func validateRegister(req *pb.RegisterRequest) error {
 	if req.GetEmail() == "" {
 		return status.Error(codes.InvalidArgument, "email is required")
@@ -154,18 +175,4 @@ func roleToProto(role string) pb.Role {
 	default:
 		return pb.Role_ROLE_USER
 	}
-}
-
-func (a *Auth) GetAccountById(ctx context.Context, userID string) (*Account, error) {
-	const op = "auth.service.GetAccountById"
-
-	log := a.log.With("op", op, "user_id", userID)
-
-	acc, err := a.usrProvider.GetAccountById(ctx, userID)
-	if err != nil {
-		log.Error("failed to get account", "error", err)
-		return nil, err
-	}
-
-	return acc, nil
 }

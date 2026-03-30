@@ -7,6 +7,7 @@ import (
 	"log/slog"
 
 	"github.com/svladislav00-qq/event-microservices/pkg/logger/sl"
+	"github.com/svladislav00-qq/event-microservices/pkg/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -18,6 +19,7 @@ type Repository interface {
 	GetAccountByEmail(ctx context.Context, email string) (*Account, error)
 	GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error)
 	PromoteToModerator(ctx context.Context, userID string, departmentId string) error
+	GetUsersByIDs(ctx context.Context, ids []string) ([]models.Account, error)
 }
 
 type postgresRepository struct {
@@ -161,4 +163,18 @@ func (r *postgresRepository) PromoteToModerator(ctx context.Context, userID stri
 		return fmt.Errorf("%s: %w", op, err)
 	}
 	return nil
+}
+
+func (r *postgresRepository) GetUsersByIDs(ctx context.Context, ids []string) ([]models.Account, error) {
+	const op = "auth.repository.GetUsersByIDs"
+
+	var accounts []models.Account
+
+	err := r.db.WithContext(ctx).Where("id IN ?", ids).Find(&accounts).Error
+	if err != nil {
+		r.log.Error("failed to get accounts by ids", slog.String("op", op), sl.Err(err))
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return accounts, nil
 }
