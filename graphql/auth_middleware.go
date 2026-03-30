@@ -1,10 +1,9 @@
-package main
+package graphql
 
 import (
 	"net/http"
 	"strings"
 
-	"github.com/svladislav00-qq/event-microservices/auth"
 	pkgauth "github.com/svladislav00-qq/event-microservices/pkg/auth"
 )
 
@@ -19,7 +18,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		token = strings.TrimPrefix(token, "Bearer ")
 
-		claims, err := auth.ParseJWT(token)
+		claims, err := pkgauth.ParseJWT(token)
 		if err != nil {
 			http.Error(w, "invalid token", http.StatusUnauthorized)
 			return

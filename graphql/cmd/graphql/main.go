@@ -4,9 +4,10 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/99designs/gqlgen/handler"
-	"github.com/kelseyhightower/envconfig"
+
+	graph "github.com/svladislav00-qq/event-microservices/graphql"
 )
 
 type AppConfig struct {
@@ -16,19 +17,25 @@ type AppConfig struct {
 }
 
 func main() {
-	var cfg AppConfig
-	err := envconfig.Process("", &cfg)
+	srv, err := graph.NewServer(
+		"localhost:44044",
+		"localhost:44045",
+		"localhost:44046",
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	s, err := NewGraphQLServer(cfg.AccountUrl, cfg.EventUrl, cfg.AttendeeUrl)
-	if err != nil {
-		log.Fatal(err)
+	resolver := &graph.Resolver{
+		Server: srv,
 	}
 
-	http.Handle("/graphql", handler.NewDefaultServer(s.ToExecutableSchema()))
-	http.Handle("/playground", playground.Handler("vlad", "/graphql"))
+	http.Handle("/query", graph.AuthMiddleware(handler.NewDefaultServer(
+		graph.NewExecutableSchema(graph.Config{Resolvers: resolver}),
+	)))
 
-	log.Fatal(http.ListenAndServe("8080", nil))
+	http.Handle("/", playground.Handler("GraphQL", "/query"))
+
+	log.Println("server started at :8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

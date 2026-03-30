@@ -110,7 +110,7 @@ func (s *serverAuth) GetMe(ctx context.Context, req *pb.GetMeRequest) (*pb.GetMe
 	}, nil
 }
 
-func (s *serverAuth) GetUsersByIds(ctx context.Context, req *pb.GetUsersByIDsRequest) (*pb.GetUsersByIDsResponse, error) {
+func (s *serverAuth) GetUsersByIDs(ctx context.Context, req *pb.GetUsersByIDsRequest) (*pb.GetUsersByIDsResponse, error) {
 	accounts, err := s.auth.GetUsersByIDs(ctx, req.UserIds)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get users: %v", err)

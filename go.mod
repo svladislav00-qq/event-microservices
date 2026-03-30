@@ -6,7 +6,6 @@ require (
 	github.com/99designs/gqlgen v0.17.87
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/joho/godotenv v1.5.1
-	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/minio/minio-go/v7 v7.0.99
 	github.com/segmentio/ksuid v1.0.4
 	github.com/tinrab/retry v1.0.0
