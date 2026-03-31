@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"context"
 	"net/http"
 	"strings"
 
@@ -9,7 +10,7 @@ import (
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
+		token := r.Header.Get("authorization")
 
 		if token == "" {
 			next.ServeHTTP(w, r)
@@ -20,7 +21,9 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		claims, err := pkgauth.ParseJWT(token)
 		if err != nil {
-			http.Error(w, "invalid token", http.StatusUnauthorized)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(`{"errors": [{"message":"invalid token"}]}`))
 			return
 		}
 
@@ -31,6 +34,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			Department: claims.Department,
 		}
 		ctx := pkgauth.ContextsWithUser(r.Context(), user)
+		ctx = context.WithValue(ctx, "token", token)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

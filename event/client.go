@@ -8,8 +8,10 @@ import (
 	"time"
 
 	"github.com/svladislav00-qq/event-microservices/event/pb"
+	authorization "github.com/svladislav00-qq/event-microservices/pkg/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -36,6 +38,17 @@ func (c *Client) Close() {
 }
 
 func (c *Client) CreateEvent(ctx context.Context, name string, description string, startTime *timestamppb.Timestamp, endTime *timestamppb.Timestamp, capacity *uint32) (*Event, error) {
+	token, ok := authorization.TokenFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("no token in context")
+	}
+
+	md := metadata.New(map[string]string{
+		"authorization": "Bearer " + token,
+	})
+
+	ctx = metadata.NewOutgoingContext(ctx, md)
+
 	r, err := c.service.CreateEvent(
 		ctx,
 		&pb.CreateEventRequest{
@@ -58,6 +71,17 @@ func (c *Client) CreateEvent(ctx context.Context, name string, description strin
 }
 
 func (c *Client) UpdateEvent(ctx context.Context, eventID string, updateData map[string]interface{}) (*Event, error) {
+	token, ok := authorization.TokenFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("no token in context")
+	}
+
+	md := metadata.New(map[string]string{
+		"authorization": "Bearer " + token,
+	})
+
+	ctx = metadata.NewOutgoingContext(ctx, md)
+
 	req := &pb.UpdateEventRequest{
 		Id: eventID,
 	}
@@ -95,6 +119,17 @@ func (c *Client) UpdateEvent(ctx context.Context, eventID string, updateData map
 }
 
 func (c *Client) DeleteEvent(ctx context.Context, eventID string) error {
+	token, ok := authorization.TokenFromContext(ctx)
+	if !ok {
+		return fmt.Errorf("no token in context")
+	}
+
+	md := metadata.New(map[string]string{
+		"authorization": "Bearer " + token,
+	})
+
+	ctx = metadata.NewOutgoingContext(ctx, md)
+
 	r, err := c.service.DeleteEvent(
 		ctx,
 		&pb.DeleteEventRequest{
@@ -113,6 +148,17 @@ func (c *Client) DeleteEvent(ctx context.Context, eventID string) error {
 }
 
 func (c *Client) GetEvent(ctx context.Context, eventID string) (*Event, error) {
+	token, ok := authorization.TokenFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("no token in context")
+	}
+
+	md := metadata.New(map[string]string{
+		"authorization": "Bearer " + token,
+	})
+
+	ctx = metadata.NewOutgoingContext(ctx, md)
+
 	r, err := c.service.GetEvent(
 		ctx,
 		&pb.GetEventRequest{
@@ -130,6 +176,17 @@ func (c *Client) GetEvent(ctx context.Context, eventID string) (*Event, error) {
 }
 
 func (c *Client) GetEvents(ctx context.Context, filter EventFilter) ([]*Event, error) {
+	token, ok := authorization.TokenFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("no token in context")
+	}
+
+	md := metadata.New(map[string]string{
+		"authorization": "Bearer " + token,
+	})
+
+	ctx = metadata.NewOutgoingContext(ctx, md)
+
 	r, err := c.service.GetEvents(
 		ctx,
 		&pb.GetEventsRequest{
@@ -150,6 +207,17 @@ func (c *Client) GetEvents(ctx context.Context, filter EventFilter) ([]*Event, e
 }
 
 func (c *Client) UploadFiles(ctx context.Context, eventID string, files []*multipart.FileHeader) ([]*pb.UploadFileResponse, error) {
+	token, ok := authorization.TokenFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("no token in context")
+	}
+
+	md := metadata.New(map[string]string{
+		"authorization": "Bearer " + token,
+	})
+
+	ctx = metadata.NewOutgoingContext(ctx, md)
+
 	var uploads []*pb.FileUpload
 
 	for _, fh := range files {

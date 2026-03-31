@@ -168,6 +168,8 @@ func (r *postgresRepository) PromoteToModerator(ctx context.Context, userID stri
 func isDuplicate(err error) bool {
 	var pgErr *pgconn.PgError
 	return errors.As(err, &pgErr) && pgErr.Code == "23505"
+}
+
 func (r *postgresRepository) GetUsersByIDs(ctx context.Context, ids []string) ([]models.Account, error) {
 	const op = "auth.repository.GetUsersByIDs"
 

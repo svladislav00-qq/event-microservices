@@ -11,12 +11,13 @@ import (
 )
 
 type Config struct {
-	Env         string
-	DatabaseURL string
-	Port        int
-	JWTSecret   string
-	GRPCPort    int
-	TokenTTL    time.Duration
+	Env             string
+	DatabaseURL     string
+	Port            int
+	JWTSecret       string
+	GRPCPort        int
+	TokenTTL        time.Duration
+	AuthGRPCAddress string
 }
 
 func MustLoad() Config {

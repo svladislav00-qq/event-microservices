@@ -2,9 +2,11 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/svladislav00-qq/event-microservices/auth/pb"
+	authorization "github.com/svladislav00-qq/event-microservices/pkg/auth"
 	"github.com/svladislav00-qq/event-microservices/pkg/models"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -69,6 +71,17 @@ func (c *Client) Login(ctx context.Context, email, password string) (string, err
 }
 
 func (c *Client) PromoteToModerator(ctx context.Context, userID string, departmentID string) (*Account, error) {
+	token, ok := authorization.TokenFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("no token in context")
+	}
+
+	md := metadata.New(map[string]string{
+		"authorization": "Bearer " + token,
+	})
+
+	ctx = metadata.NewOutgoingContext(ctx, md)
+
 	r, err := c.service.PromoteToModerator(ctx, &pb.PromoteToModeratorRequest{
 		UserId:     userID,
 		Department: departmentID,
@@ -91,14 +104,21 @@ func (c *Client) PromoteToModerator(ctx context.Context, userID string, departme
 	}, nil
 }
 
-func (c *Client) GetMe(ctx context.Context, token string) (*pb.GetMeResponse, error) {
+func (c *Client) GetMe(ctx context.Context) (*pb.GetMeResponse, error) {
+	token, ok := ctx.Value("token").(string)
+	if !ok || token == "" {
+		return nil, errors.New("no token in context")
+	}
+
 	md := metadata.New(map[string]string{
 		"authorization": "Bearer " + token,
 	})
 
 	ctx = metadata.NewOutgoingContext(ctx, md)
 
-	return c.conn.GetMe(ctx, &pb.GetMeRequest{})
+	return c.service.GetMe(ctx, &pb.GetMeRequest{})
+}
+
 func (c *Client) GetUsersByIDs(ctx context.Context, ids []string) ([]models.Account, error) {
 	resp, err := c.service.GetUsersByIDs(ctx, &pb.GetUsersByIDsRequest{
 		UserIds: ids,

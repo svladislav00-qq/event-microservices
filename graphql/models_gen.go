@@ -21,7 +21,71 @@ type Account struct {
 	DeletedAt  *time.Time `json:"deletedAt,omitempty"`
 }
 
+type AuthPayload struct {
+	Token string `json:"token"`
+}
+
+type CreateEventInput struct {
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	StartTime   time.Time `json:"startTime"`
+	EndTime     time.Time `json:"endTime"`
+	Capacity    *int      `json:"capacity,omitempty"`
+}
+
+type DeleteEventInput struct {
+	ID string `json:"id"`
+}
+
+type Event struct {
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Department  string    `json:"department"`
+	CreatedBy   string    `json:"createdBy"`
+	StartTime   time.Time `json:"startTime"`
+	EndTime     time.Time `json:"endTime"`
+	Capacity    *int      `json:"capacity,omitempty"`
+}
+
+type GetEventInput struct {
+	ID string `json:"id"`
+}
+
+type GetEventsInput struct {
+	Skip *int `json:"skip,omitempty"`
+	Take *int `json:"take,omitempty"`
+}
+
+type LoginInput struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type Mutation struct {
+}
+
+type PromoteToModeratorInput struct {
+	ID         string `json:"id"`
+	Department string `json:"department"`
+}
+
 type Query struct {
+}
+
+type RegisterInput struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Username string `json:"username"`
+}
+
+type UpdateEventInput struct {
+	ID          string     `json:"id"`
+	Name        *string    `json:"name,omitempty"`
+	Description *string    `json:"description,omitempty"`
+	StartTime   *time.Time `json:"startTime,omitempty"`
+	EndTime     *time.Time `json:"endTime,omitempty"`
+	Capacity    *int       `json:"capacity,omitempty"`
 }
 
 type Role string

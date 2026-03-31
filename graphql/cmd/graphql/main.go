@@ -3,9 +3,11 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/joho/godotenv"
 
 	graph "github.com/svladislav00-qq/event-microservices/graphql"
 )
@@ -17,25 +19,35 @@ type AppConfig struct {
 }
 
 func main() {
-	srv, err := graph.NewServer(
-		"localhost:44044",
-		"localhost:44045",
-		"localhost:44046",
-	)
+	err := godotenv.Load("../../.env")
 	if err != nil {
-		log.Fatal(err)
+		log.Println("No .env file found")
+	}
+
+	authAddr := os.Getenv("AUTH_GRPC_ADDRESS")
+	eventAddr := os.Getenv("EVENT_GRPC_ADDRESS")
+	attendeeAddr := os.Getenv("ATTENDEE_GRPC_ADDRESS")
+
+	srv, err := graph.NewServer(authAddr, eventAddr, attendeeAddr)
+	if err != nil {
+		log.Fatalf("failed to create server: %v", err)
 	}
 
 	resolver := &graph.Resolver{
 		Server: srv,
 	}
 
-	http.Handle("/query", graph.AuthMiddleware(handler.NewDefaultServer(
-		graph.NewExecutableSchema(graph.Config{Resolvers: resolver}),
-	)))
+	gqlServer := handler.NewDefaultServer(
+		graph.NewExecutableSchema(graph.Config{
+			Resolvers: resolver,
+		}),
+	)
 
-	http.Handle("/", playground.Handler("GraphQL", "/query"))
+	http.Handle("/query", graph.AuthMiddleware(gqlServer))
+	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 
-	log.Println("server started at :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	port := "8080"
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

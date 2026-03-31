@@ -9,8 +9,178 @@ import (
 	"context"
 	"errors"
 
+	"github.com/svladislav00-qq/event-microservices/event"
 	authorization "github.com/svladislav00-qq/event-microservices/pkg/auth"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
+
+// Login is the resolver for the login field.
+func (r *mutationResolver) Login(ctx context.Context, input LoginInput) (*AuthPayload, error) {
+	token, err := r.Resolver.Server.authClient.Login(ctx, input.Email, input.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	return &AuthPayload{
+		Token: token,
+	}, nil
+}
+
+// Register is the resolver for the register field.
+func (r *mutationResolver) Register(ctx context.Context, input RegisterInput) (*Account, error) {
+	resp, err := r.Resolver.Server.authClient.Register(ctx, input.Email, input.Password, input.Username)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Account{
+		ID:       resp.ID,
+		Email:    resp.Email,
+		Username: resp.Username,
+		Role:     Role(resp.Role),
+	}, nil
+}
+
+// PromoteToModerator is the resolver for the promoteToModerator field.
+func (r *mutationResolver) PromoteToModerator(ctx context.Context, input PromoteToModeratorInput) (*Account, error) {
+	resp, err := r.Resolver.Server.authClient.PromoteToModerator(ctx, input.ID, input.Department)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Account{
+		ID:         resp.ID,
+		Email:      resp.Email,
+		Username:   resp.Username,
+		Role:       Role(resp.Role),
+		Department: &resp.Department,
+	}, nil
+}
+
+// CreateEvent is the resolver for the createEvent field.
+func (r *mutationResolver) CreateEvent(ctx context.Context, input CreateEventInput) (*Event, error) {
+	var capacity *uint32
+	if input.Capacity != nil {
+		c := uint32(*input.Capacity)
+		capacity = &c
+	}
+
+	resp, err := r.Resolver.Server.eventClient.CreateEvent(
+		ctx,
+		input.Name,
+		input.Description,
+		timestamppb.New(input.StartTime),
+		timestamppb.New(input.EndTime),
+		capacity)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Event{
+		ID:          resp.ID,
+		Name:        resp.EventName,
+		Description: resp.Description,
+		Department:  resp.Department,
+		CreatedBy:   resp.CreatedBy,
+		StartTime:   resp.StartTime,
+		EndTime:     resp.EndTime,
+		Capacity:    resp.Capacity,
+	}, nil
+}
+
+// UpdateEvent is the resolver for the updateEvent field.
+func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEventInput) (*Event, error) {
+	update := make(map[string]interface{})
+
+	if input.Name != nil {
+		update["name"] = *input.Name
+	}
+
+	if input.Description != nil {
+		update["description"] = *input.Description
+	}
+
+	if input.StartTime != nil {
+		update["start_time"] = *input.StartTime
+	}
+	if input.EndTime != nil {
+		update["end_time"] = *input.EndTime
+	}
+	if input.Capacity != nil {
+		update["capacity"] = *input.Capacity
+	}
+
+	resp, err := r.Server.eventClient.UpdateEvent(ctx, input.ID, update)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Event{
+		ID:          resp.ID,
+		Name:        resp.EventName,
+		Description: resp.Description,
+		Department:  resp.Department,
+		StartTime:   resp.StartTime,
+		EndTime:     resp.EndTime,
+		Capacity:    resp.Capacity,
+	}, nil
+}
+
+// DeleteEvent is the resolver for the deleteEvent field.
+func (r *mutationResolver) DeleteEvent(ctx context.Context, input DeleteEventInput) (bool, error) {
+	err := r.Server.eventClient.DeleteEvent(ctx, input.ID)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+// GetEvent is the resolver for the getEvent field.
+func (r *mutationResolver) GetEvent(ctx context.Context, input GetEventInput) (*Event, error) {
+	resp, err := r.Server.eventClient.GetEvent(ctx, input.ID)
+	if err != nil {
+		return nil, err
+	}
+	return &Event{
+		ID:          resp.ID,
+		Name:        resp.EventName,
+		Description: resp.Description,
+		Department:  resp.Department,
+		CreatedBy:   resp.CreatedBy,
+		StartTime:   resp.StartTime,
+		EndTime:     resp.EndTime,
+		Capacity:    resp.Capacity,
+	}, nil
+}
+
+// GetEvents is the resolver for the getEvents field.
+func (r *mutationResolver) GetEvents(ctx context.Context, input GetEventsInput) ([]*Event, error) {
+	resp, err := r.Server.eventClient.GetEvents(ctx, event.EventFilter{
+		Skip: uint64(*input.Skip),
+		Take: uint64(*input.Take),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*Event
+
+	for _, e := range resp {
+		result = append(result, &Event{
+			ID:          e.ID,
+			Name:        e.EventName,
+			Description: e.Description,
+			Department:  e.Department,
+			CreatedBy:   e.CreatedBy,
+			StartTime:   e.StartTime,
+			EndTime:     e.EndTime,
+			Capacity:    e.Capacity,
+		})
+	}
+
+	return result, nil
+}
 
 // Ping is the resolver for the ping field.
 func (r *queryResolver) Ping(ctx context.Context) (string, error) {
@@ -21,25 +191,30 @@ func (r *queryResolver) Ping(ctx context.Context) (string, error) {
 
 // Me is the resolver for the me field.
 func (r *queryResolver) Me(ctx context.Context) (*Account, error) {
-	user := authorization.ContextsWithUser(ctx)
+	user, _ := authorization.UserFromContext(ctx)
 	if user == nil {
 		return nil, errors.New("unauthorized")
 	}
 
-	res, err := r.Resolver.Server.authClient.GetMe(ctx)
+	resp, err := r.Server.authClient.GetMe(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Account{
-		ID:       res.Id,
-		Email:    res.Email,
-		Username: res.Username,
-		Role:     res.Role,
+		ID:         resp.Account.Id,
+		Email:      resp.Account.Email,
+		Username:   resp.Account.Username,
+		Role:       Role(resp.Account.Role.String()),
+		Department: &resp.Account.Department,
 	}, nil
 }
+
+// Mutation returns MutationResolver implementation.
+func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

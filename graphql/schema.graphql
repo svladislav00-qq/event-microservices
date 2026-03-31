@@ -19,8 +19,85 @@ type Account {
   deletedAt: Time
 }
 
+type Event {
+  id: ID!
+  name: String!
+  description: String!
+  department: String!
+  createdBy: String!
+
+  startTime: Time!
+  endTime: Time!
+
+  capacity: Int
+}
+
+input RegisterInput {
+  email: String!
+  password: String!
+  username: String!
+}
+
 
 type Query {
   ping: String!
   me: Account!
+}
+
+type Mutation {
+  #auth 
+  login(input: LoginInput!): AuthPayload!
+  register(input: RegisterInput!): Account!
+  promoteToModerator(input: PromoteToModeratorInput!): Account!
+
+  #event 
+  createEvent(input: CreateEventInput!): Event!
+  updateEvent(input: UpdateEventInput!): Event!
+  deleteEvent(input: DeleteEventInput!): Boolean!
+  getEvent(input: GetEventInput!): Event!
+  getEvents(input: GetEventsInput!): [Event!]!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input PromoteToModeratorInput{
+  id: ID!
+  department: String!
+}
+
+type AuthPayload {
+  token: String!
+}
+
+input CreateEventInput {
+  name: String!
+  description: String!
+  startTime: Time!
+  endTime: Time!
+  capacity: Int
+}
+
+input UpdateEventInput {
+  id: ID!
+  name: String
+  description: String
+  startTime: Time
+  endTime: Time
+  capacity: Int
+}
+
+input DeleteEventInput {
+  id: ID!
+}
+
+input GetEventInput {
+  id: ID!
+}
+
+input GetEventsInput {
+  skip: Int
+  take: Int
 }
