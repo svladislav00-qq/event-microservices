@@ -250,3 +250,37 @@ func (c *Client) UploadFiles(ctx context.Context, eventID string, files []*multi
 
 	return resp.Files, nil
 }
+
+func (c *Client) UploadFilesRaw(ctx context.Context, eventID string, files []struct {
+	Name string
+	Data []byte
+}) ([]*pb.UploadFileResponse, error) {
+	token, ok := authorization.TokenFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("no token")
+	}
+
+	md := metadata.New(map[string]string{
+		"authorization": "Bearer " + token,
+	})
+
+	ctx = metadata.NewOutgoingContext(ctx, md)
+
+	var uploads []*pb.FileUpload
+	for _, f := range files {
+		uploads = append(uploads, &pb.FileUpload{
+			FileName: f.Name,
+			FileData: f.Data,
+		})
+	}
+
+	resp, err := c.service.UploadFiles(ctx, &pb.UploadFilesRequest{
+		Id:    eventID,
+		Files: uploads,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Files, nil
+}

@@ -8,7 +8,9 @@ package graphql
 import (
 	"context"
 	"errors"
+	"io"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/svladislav00-qq/event-microservices/event"
 	authorization "github.com/svladislav00-qq/event-microservices/pkg/auth"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -136,46 +138,38 @@ func (r *mutationResolver) DeleteEvent(ctx context.Context, input DeleteEventInp
 	return true, nil
 }
 
-// GetEvent is the resolver for the getEvent field.
-func (r *mutationResolver) GetEvent(ctx context.Context, input GetEventInput) (*Event, error) {
-	resp, err := r.Server.eventClient.GetEvent(ctx, input.ID)
+// UploadFiles is the resolver for the uploadFiles field.
+func (r *mutationResolver) UploadFiles(ctx context.Context, id string, files []*graphql.Upload) ([]*UploadFileResponse, error) {
+	var uploads []struct {
+		Name string
+		Data []byte
+	}
+
+	for _, f := range files {
+		data, err := io.ReadAll(f.File)
+		if err != nil {
+			return nil, err
+		}
+
+		uploads = append(uploads, struct {
+			Name string
+			Data []byte
+		}{
+			Name: f.Filename,
+			Data: data,
+		})
+	}
+
+	resp, err := r.Resolver.Server.eventClient.UploadFilesRaw(ctx, id, uploads)
 	if err != nil {
 		return nil, err
 	}
-	return &Event{
-		ID:          resp.ID,
-		Name:        resp.EventName,
-		Description: resp.Description,
-		Department:  resp.Department,
-		CreatedBy:   resp.CreatedBy,
-		StartTime:   resp.StartTime,
-		EndTime:     resp.EndTime,
-		Capacity:    resp.Capacity,
-	}, nil
-}
 
-// GetEvents is the resolver for the getEvents field.
-func (r *mutationResolver) GetEvents(ctx context.Context, input GetEventsInput) ([]*Event, error) {
-	resp, err := r.Server.eventClient.GetEvents(ctx, event.EventFilter{
-		Skip: uint64(*input.Skip),
-		Take: uint64(*input.Take),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	var result []*Event
-
-	for _, e := range resp {
-		result = append(result, &Event{
-			ID:          e.ID,
-			Name:        e.EventName,
-			Description: e.Description,
-			Department:  e.Department,
-			CreatedBy:   e.CreatedBy,
-			StartTime:   e.StartTime,
-			EndTime:     e.EndTime,
-			Capacity:    e.Capacity,
+	var result []*UploadFileResponse
+	for _, f := range resp {
+		result = append(result, &UploadFileResponse{
+			UploadURL: f.UploadUrl,
+			FileKey:   f.FileKey,
 		})
 	}
 
@@ -208,6 +202,52 @@ func (r *queryResolver) Me(ctx context.Context) (*Account, error) {
 		Role:       Role(resp.Account.Role.String()),
 		Department: &resp.Account.Department,
 	}, nil
+}
+
+// GetEvent is the resolver for the getEvent field.
+func (r *queryResolver) GetEvent(ctx context.Context, input GetEventInput) (*Event, error) {
+	resp, err := r.Server.eventClient.GetEvent(ctx, input.ID)
+	if err != nil {
+		return nil, err
+	}
+	return &Event{
+		ID:          resp.ID,
+		Name:        resp.EventName,
+		Description: resp.Description,
+		Department:  resp.Department,
+		CreatedBy:   resp.CreatedBy,
+		StartTime:   resp.StartTime,
+		EndTime:     resp.EndTime,
+		Capacity:    resp.Capacity,
+	}, nil
+}
+
+// GetEvents is the resolver for the getEvents field.
+func (r *queryResolver) GetEvents(ctx context.Context, input GetEventsInput) ([]*Event, error) {
+	resp, err := r.Server.eventClient.GetEvents(ctx, event.EventFilter{
+		Skip: uint64(*input.Skip),
+		Take: uint64(*input.Take),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*Event
+
+	for _, e := range resp {
+		result = append(result, &Event{
+			ID:          e.ID,
+			Name:        e.EventName,
+			Description: e.Description,
+			Department:  e.Department,
+			CreatedBy:   e.CreatedBy,
+			StartTime:   e.StartTime,
+			EndTime:     e.EndTime,
+			Capacity:    e.Capacity,
+		})
+	}
+
+	return result, nil
 }
 
 // Mutation returns MutationResolver implementation.

@@ -132,6 +132,7 @@ func (e *EventService) UploadFile(ctx context.Context, eventID string, fileName 
 	url := e.flSaver.GetURL(fileKey)
 
 	file := &EventFile{
+		ID:       ksuid.New().String(),
 		EventID:  eventID,
 		FileKey:  fileKey,
 		FileType: http.DetectContentType(data),

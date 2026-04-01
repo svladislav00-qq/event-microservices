@@ -1,4 +1,5 @@
 scalar Time
+scalar Upload
 
 enum Role {
   USER
@@ -40,8 +41,13 @@ input RegisterInput {
 
 
 type Query {
+  #auth
   ping: String!
   me: Account!
+
+  #event
+  getEvent(input: GetEventInput!): Event!
+  getEvents(input: GetEventsInput!): [Event!]!
 }
 
 type Mutation {
@@ -54,8 +60,7 @@ type Mutation {
   createEvent(input: CreateEventInput!): Event!
   updateEvent(input: UpdateEventInput!): Event!
   deleteEvent(input: DeleteEventInput!): Boolean!
-  getEvent(input: GetEventInput!): Event!
-  getEvents(input: GetEventsInput!): [Event!]!
+  uploadFiles(id: ID!, files: [Upload!]!): [UploadFileResponse!]!
 }
 
 input LoginInput {
@@ -100,4 +105,9 @@ input GetEventInput {
 input GetEventsInput {
   skip: Int
   take: Int
+}
+
+type UploadFileResponse {
+  uploadUrl: String!
+  fileKey: String!
 }

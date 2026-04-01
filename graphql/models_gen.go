@@ -88,6 +88,11 @@ type UpdateEventInput struct {
 	Capacity    *int       `json:"capacity,omitempty"`
 }
 
+type UploadFileResponse struct {
+	UploadURL string `json:"uploadUrl"`
+	FileKey   string `json:"fileKey"`
+}
+
 type Role string
 
 const (
