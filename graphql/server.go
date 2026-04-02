@@ -1,36 +1,39 @@
 package graphql
 
 import (
-	"github.com/svladislav00-qq/event-microservices/attendee"
-	"github.com/svladislav00-qq/event-microservices/auth"
-	"github.com/svladislav00-qq/event-microservices/event"
+	attendeepb "github.com/svladislav00-qq/event-microservices/attendee/pb"
+	authpb "github.com/svladislav00-qq/event-microservices/auth/pb"
+	eventpb "github.com/svladislav00-qq/event-microservices/event/pb"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Server struct {
-	authClient     *auth.Client
-	eventClient    *event.Client
-	attendeeClient *attendee.Client
+	authClient     authpb.AuthServiceClient
+	eventClient    eventpb.EventServiceClient
+	attendeeClient attendeepb.AttendeeServiceClient
 }
 
 func NewServer(authURL, eventURL, attendeeURL string) (*Server, error) {
-	authClient, err := auth.NewClient(authURL)
+	authConn, err := grpc.NewClient(authURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
 
-	eventClient, err := event.NewClient(eventURL)
+	eventConn, err := grpc.NewClient(eventURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
 
-	attendeeClient, err := attendee.NewClient(attendeeURL)
+	attendeeConn, err := grpc.NewClient(attendeeURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
 
 	return &Server{
-		authClient:     authClient,
-		eventClient:    eventClient,
-		attendeeClient: attendeeClient,
+		authClient:     authpb.NewAuthServiceClient(authConn),
+		eventClient:    eventpb.NewEventServiceClient(eventConn),
+		attendeeClient: attendeepb.NewAttendeeServiceClient(attendeeConn),
 	}, nil
 }

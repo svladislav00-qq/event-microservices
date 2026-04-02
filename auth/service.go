@@ -96,7 +96,12 @@ func (a *Auth) Register(ctx context.Context, email, password, username string) (
 	if err := a.usrSaver.PostAccount(ctx, *res); err != nil {
 		if errors.Is(err, ErrUserExists) {
 			log.Warn("user already exists", sl.Err(err))
-			return nil, ErrUserExists
+
+			existing, getErr := a.usrProvider.GetAccountByEmail(ctx, email)
+			if getErr != nil {
+				return nil, fmt.Errorf("%s: %w", op, getErr)
+			}
+			return existing, nil
 		}
 		log.Error("failed to save user", sl.Err(err))
 		return nil, fmt.Errorf("%s: %w", op, err)

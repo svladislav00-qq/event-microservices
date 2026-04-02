@@ -61,10 +61,12 @@ type ComplexityRoot struct {
 
 	Event struct {
 		Capacity    func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
 		CreatedBy   func(childComplexity int) int
 		Department  func(childComplexity int) int
 		Description func(childComplexity int) int
 		EndTime     func(childComplexity int) int
+		FileUrls    func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Name        func(childComplexity int) int
 		StartTime   func(childComplexity int) int
@@ -237,6 +239,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Event.Capacity(childComplexity), true
+	case "Event.createdAt":
+		if e.ComplexityRoot.Event.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Event.CreatedAt(childComplexity), true
 	case "Event.createdBy":
 		if e.ComplexityRoot.Event.CreatedBy == nil {
 			break
@@ -261,6 +269,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Event.EndTime(childComplexity), true
+	case "Event.fileUrls":
+		if e.ComplexityRoot.Event.FileUrls == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Event.FileUrls(childComplexity), true
 	case "Event.id":
 		if e.ComplexityRoot.Event.ID == nil {
 			break
@@ -1438,6 +1452,35 @@ func (ec *executionContext) fieldContext_Event_endTime(_ context.Context, field 
 	return fc, nil
 }
 
+func (ec *executionContext) _Event_createdAt(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Event_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNTime2timeᚐTime,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Event_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Event_capacity(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1462,6 +1505,35 @@ func (ec *executionContext) fieldContext_Event_capacity(_ context.Context, field
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Event_fileUrls(ctx context.Context, field graphql.CollectedField, obj *Event) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Event_fileUrls,
+		func(ctx context.Context) (any, error) {
+			return obj.FileUrls, nil
+		},
+		nil,
+		ec.marshalOString2ᚕstringᚄ,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Event_fileUrls(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1727,8 +1799,12 @@ func (ec *executionContext) fieldContext_Mutation_createEvent(ctx context.Contex
 				return ec.fieldContext_Event_startTime(ctx, field)
 			case "endTime":
 				return ec.fieldContext_Event_endTime(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Event_createdAt(ctx, field)
 			case "capacity":
 				return ec.fieldContext_Event_capacity(ctx, field)
+			case "fileUrls":
+				return ec.fieldContext_Event_fileUrls(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -1786,8 +1862,12 @@ func (ec *executionContext) fieldContext_Mutation_updateEvent(ctx context.Contex
 				return ec.fieldContext_Event_startTime(ctx, field)
 			case "endTime":
 				return ec.fieldContext_Event_endTime(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Event_createdAt(ctx, field)
 			case "capacity":
 				return ec.fieldContext_Event_capacity(ctx, field)
+			case "fileUrls":
+				return ec.fieldContext_Event_fileUrls(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -2190,8 +2270,12 @@ func (ec *executionContext) fieldContext_Query_getEvent(ctx context.Context, fie
 				return ec.fieldContext_Event_startTime(ctx, field)
 			case "endTime":
 				return ec.fieldContext_Event_endTime(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Event_createdAt(ctx, field)
 			case "capacity":
 				return ec.fieldContext_Event_capacity(ctx, field)
+			case "fileUrls":
+				return ec.fieldContext_Event_fileUrls(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -2249,8 +2333,12 @@ func (ec *executionContext) fieldContext_Query_getEvents(ctx context.Context, fi
 				return ec.fieldContext_Event_startTime(ctx, field)
 			case "endTime":
 				return ec.fieldContext_Event_endTime(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Event_createdAt(ctx, field)
 			case "capacity":
 				return ec.fieldContext_Event_capacity(ctx, field)
+			case "fileUrls":
+				return ec.fieldContext_Event_fileUrls(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
@@ -4696,8 +4784,15 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "createdAt":
+			out.Values[i] = ec._Event_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "capacity":
 			out.Values[i] = ec._Event_capacity(ctx, field, obj)
+		case "fileUrls":
+			out.Values[i] = ec._Event_fileUrls(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6034,6 +6129,42 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	_ = ctx
 	res := graphql.MarshalInt(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {

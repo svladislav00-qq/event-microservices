@@ -160,7 +160,7 @@ func (c *Client) GetEventAttendees(ctx context.Context, eventID string, skip uin
 	return result, nil
 }
 
-func (c *Client) ExportAttendeeTable(ctx context.Context, eventID string) ([]byte, string, error) {
+func (c *Client) ExportAttendeesTable(ctx context.Context, eventID string) ([]byte, string, error) {
 	token, ok := authorization.TokenFromContext(ctx)
 	if !ok {
 		return nil, "", fmt.Errorf("no token in context")
@@ -174,7 +174,7 @@ func (c *Client) ExportAttendeeTable(ctx context.Context, eventID string) ([]byt
 
 	resp, err := c.service.ExportAttendeesTable(
 		ctx,
-		&pb.ExportAttendeeTableRequest{
+		&pb.ExportAttendeesTableRequest{
 			EventId: eventID,
 		},
 	)

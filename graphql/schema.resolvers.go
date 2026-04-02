@@ -10,55 +10,71 @@ import (
 	"encoding/base64"
 	"errors"
 	"io"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/svladislav00-qq/event-microservices/event"
+	attendeepb "github.com/svladislav00-qq/event-microservices/attendee/pb"
+	authtpb "github.com/svladislav00-qq/event-microservices/auth/pb"
+	"github.com/svladislav00-qq/event-microservices/event/pb"
+	eventpb "github.com/svladislav00-qq/event-microservices/event/pb"
 	authorization "github.com/svladislav00-qq/event-microservices/pkg/auth"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, input LoginInput) (*AuthPayload, error) {
-	token, err := r.Resolver.Server.authClient.Login(ctx, input.Email, input.Password)
+	resp, err := r.Resolver.Server.authClient.Login(ctx, &authtpb.LoginRequest{
+		Email:    input.Email,
+		Password: input.Password,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	return &AuthPayload{
-		Token: token,
+		Token: resp.Token,
 	}, nil
 }
 
 // Register is the resolver for the register field.
 func (r *mutationResolver) Register(ctx context.Context, input RegisterInput) (*Account, error) {
-	resp, err := r.Resolver.Server.authClient.Register(ctx, input.Email, input.Password, input.Username)
+	resp, err := r.Resolver.Server.authClient.Register(ctx, &authtpb.RegisterRequest{
+		Email:    input.Email,
+		Password: input.Password,
+		Username: input.Username,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	return &Account{
-		ID:        resp.ID,
-		Email:     resp.Email,
-		Username:  resp.Username,
-		Role:      Role(resp.Role),
-		CreatedAt: resp.CreatedAt,
-		UpdatedAt: resp.UpdatedAt,
+		ID:        resp.Account.Id,
+		Email:     resp.Account.Email,
+		Username:  resp.Account.Username,
+		Role:      Role(resp.Account.Role),
+		CreatedAt: resp.Account.CreatedAt.AsTime(),
+		UpdatedAt: resp.Account.UpdatedAt.AsTime(),
 	}, nil
 }
 
 // PromoteToModerator is the resolver for the promoteToModerator field.
 func (r *mutationResolver) PromoteToModerator(ctx context.Context, input PromoteToModeratorInput) (*Account, error) {
-	resp, err := r.Resolver.Server.authClient.PromoteToModerator(ctx, input.ID, input.Department)
+	ctx = WithAuth(ctx)
+
+	resp, err := r.Resolver.Server.authClient.PromoteToModerator(ctx, &authtpb.PromoteToModeratorRequest{
+		UserId:     input.ID,
+		Department: input.Department,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	return &Account{
-		ID:         resp.ID,
-		Email:      resp.Email,
-		Username:   resp.Username,
-		Role:       Role(resp.Role),
-		Department: &resp.Department,
+		ID:         resp.Account.Id,
+		Email:      resp.Account.Email,
+		Username:   resp.Account.Username,
+		Role:       Role(resp.Account.Role),
+		Department: &resp.Account.Department,
 	}, nil
 }
 
@@ -70,70 +86,91 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input CreateEventInp
 		capacity = &c
 	}
 
+	ctx = WithAuth(ctx)
+
 	resp, err := r.Resolver.Server.eventClient.CreateEvent(
 		ctx,
-		input.Name,
-		input.Description,
-		timestamppb.New(input.StartTime),
-		timestamppb.New(input.EndTime),
-		capacity)
+		&eventpb.CreateEventRequest{
+			Name:        input.Name,
+			Description: input.Description,
+			StartTime:   timestamppb.New(input.StartTime),
+			EndTime:     timestamppb.New(input.EndTime),
+			Capacity:    capacity,
+		})
+
 	if err != nil {
 		return nil, err
 	}
 
+	cap := int(resp.Event.Capacity)
+
 	return &Event{
-		ID:          resp.ID,
-		Name:        resp.EventName,
-		Description: resp.Description,
-		Department:  resp.Department,
-		CreatedBy:   resp.CreatedBy,
-		StartTime:   resp.StartTime,
-		EndTime:     resp.EndTime,
-		Capacity:    resp.Capacity,
+		ID:          resp.Event.Id,
+		Name:        resp.Event.Name,
+		Description: resp.Event.Description,
+		Department:  resp.Event.Department,
+		CreatedBy:   resp.Event.CreatedBy,
+		StartTime:   resp.Event.StartTime.AsTime(),
+		EndTime:     resp.Event.EndTime.AsTime(),
+		CreatedAt:   resp.Event.CreatedAt.AsTime(),
+		Capacity:    &cap,
+		FileUrls:    resp.Event.FileUrls,
 	}, nil
 }
 
 // UpdateEvent is the resolver for the updateEvent field.
 func (r *mutationResolver) UpdateEvent(ctx context.Context, input UpdateEventInput) (*Event, error) {
-	update := make(map[string]interface{})
+	ctx = WithAuth(ctx)
+
+	req := &eventpb.UpdateEventRequest{
+		Id: input.ID,
+	}
 
 	if input.Name != nil {
-		update["name"] = *input.Name
+		req.Name = *input.Name
 	}
 
 	if input.Description != nil {
-		update["description"] = *input.Description
+		req.Description = *input.Description
 	}
 
 	if input.StartTime != nil {
-		update["start_time"] = *input.StartTime
-	}
-	if input.EndTime != nil {
-		update["end_time"] = *input.EndTime
-	}
-	if input.Capacity != nil {
-		update["capacity"] = *input.Capacity
+		req.StartTime = timestamppb.New(*input.StartTime)
 	}
 
-	resp, err := r.Server.eventClient.UpdateEvent(ctx, input.ID, update)
+	if input.EndTime != nil {
+		req.EndTime = timestamppb.New(*input.EndTime)
+	}
+
+	if input.Capacity != nil {
+		cap := uint32(*input.Capacity)
+		req.Capacity = &cap
+	}
+
+	resp, err := r.Resolver.Server.eventClient.UpdateEvent(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
+	cap := int(resp.Event.Capacity)
+
 	return &Event{
-		ID:          resp.ID,
-		Name:        resp.EventName,
-		Description: resp.Description,
-		Department:  resp.Department,
-		StartTime:   resp.StartTime,
-		EndTime:     resp.EndTime,
-		Capacity:    resp.Capacity,
+		ID:          resp.Event.Id,
+		Name:        resp.Event.Name,
+		Description: resp.Event.Description,
+		Department:  resp.Event.Department,
+		StartTime:   resp.Event.StartTime.AsTime(),
+		EndTime:     resp.Event.EndTime.AsTime(),
+		Capacity:    &cap,
 	}, nil
 }
 
 // DeleteEvent is the resolver for the deleteEvent field.
 func (r *mutationResolver) DeleteEvent(ctx context.Context, input DeleteEventInput) (bool, error) {
-	err := r.Server.eventClient.DeleteEvent(ctx, input.ID)
+	ctx = WithAuth(ctx)
+	_, err := r.Resolver.Server.eventClient.DeleteEvent(ctx, &eventpb.DeleteEventRequest{
+		Id: input.ID,
+	})
 	if err != nil {
 		return false, err
 	}
@@ -143,10 +180,7 @@ func (r *mutationResolver) DeleteEvent(ctx context.Context, input DeleteEventInp
 
 // UploadFiles is the resolver for the uploadFiles field.
 func (r *mutationResolver) UploadFiles(ctx context.Context, id string, files []*graphql.Upload) ([]*UploadFileResponse, error) {
-	var uploads []struct {
-		Name string
-		Data []byte
-	}
+	var uploads []*pb.FileUpload
 
 	for _, f := range files {
 		data, err := io.ReadAll(f.File)
@@ -154,22 +188,24 @@ func (r *mutationResolver) UploadFiles(ctx context.Context, id string, files []*
 			return nil, err
 		}
 
-		uploads = append(uploads, struct {
-			Name string
-			Data []byte
-		}{
-			Name: f.Filename,
-			Data: data,
+		uploads = append(uploads, &eventpb.FileUpload{
+			FileName:    f.Filename,
+			ContentType: f.ContentType,
+			FileData:    data,
 		})
 	}
 
-	resp, err := r.Resolver.Server.eventClient.UploadFilesRaw(ctx, id, uploads)
+	ctx = WithAuth(ctx)
+	resp, err := r.Resolver.Server.eventClient.UploadFiles(ctx, &eventpb.UploadFilesRequest{
+		Id:    id,
+		Files: uploads,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	var result []*UploadFileResponse
-	for _, f := range resp {
+	for _, f := range resp.Files {
 		result = append(result, &UploadFileResponse{
 			UploadURL: f.UploadUrl,
 			FileKey:   f.FileKey,
@@ -181,22 +217,35 @@ func (r *mutationResolver) UploadFiles(ctx context.Context, id string, files []*
 
 // RegisterToEvent is the resolver for the registerToEvent field.
 func (r *mutationResolver) RegisterToEvent(ctx context.Context, input EventIDInput) (*Attendee, error) {
-	resp, err := r.Resolver.Server.attendeeClient.RegisterToEvent(ctx, input.EventID)
+	ctx = WithAuth(ctx)
+	resp, err := r.Resolver.Server.attendeeClient.RegisterToEvent(ctx, &attendeepb.RegisterToEventRequest{
+		EventId: input.EventID,
+	})
 	if err != nil {
 		return nil, err
 	}
+
+	var registeredAt *time.Time
+	if resp.Attendee.RegisteredAt != nil {
+		t := resp.Attendee.RegisteredAt.AsTime()
+		registeredAt = &t
+	}
+
 	return &Attendee{
-		ID:           resp.ID,
-		UserID:       resp.UserID,
-		EventID:      resp.EventID,
-		Status:       Status(resp.Status),
-		RegisteredAt: &resp.RegisteredAt,
+		ID:           resp.Attendee.Id,
+		UserID:       resp.Attendee.UserId,
+		EventID:      resp.Attendee.EventId,
+		Status:       Status(resp.Attendee.Status),
+		RegisteredAt: registeredAt,
 	}, nil
 }
 
 // CancelRegistration is the resolver for the cancelRegistration field.
 func (r *mutationResolver) CancelRegistration(ctx context.Context, input EventIDInput) (bool, error) {
-	err := r.Resolver.Server.attendeeClient.CancelRegistration(ctx, input.EventID)
+	ctx = WithAuth(ctx)
+	_, err := r.Resolver.Server.attendeeClient.CancelRegistration(ctx, &attendeepb.CancelRegistrationRequest{
+		EventId: input.EventID,
+	})
 	if err != nil {
 		return false, err
 	}
@@ -218,7 +267,8 @@ func (r *queryResolver) Me(ctx context.Context) (*Account, error) {
 		return nil, errors.New("unauthorized")
 	}
 
-	resp, err := r.Server.authClient.GetMe(ctx)
+	ctx = WithAuth(ctx)
+	resp, err := r.Server.authClient.GetMe(ctx, &authtpb.GetMeRequest{})
 	if err != nil {
 		return nil, err
 	}
@@ -234,25 +284,38 @@ func (r *queryResolver) Me(ctx context.Context) (*Account, error) {
 
 // GetEvent is the resolver for the getEvent field.
 func (r *queryResolver) GetEvent(ctx context.Context, input GetEventInput) (*Event, error) {
-	resp, err := r.Server.eventClient.GetEvent(ctx, input.ID)
+	ctx = WithAuth(ctx)
+	resp, err := r.Server.eventClient.GetEvent(ctx, &eventpb.GetEventRequest{
+		Id: input.ID,
+	})
 	if err != nil {
 		return nil, err
 	}
+
+	cap := int(resp.Event.Capacity)
+	fileUrls := resp.Event.FileUrls
+	if fileUrls == nil {
+		fileUrls = []string{}
+	}
+
 	return &Event{
-		ID:          resp.ID,
-		Name:        resp.EventName,
-		Description: resp.Description,
-		Department:  resp.Department,
-		CreatedBy:   resp.CreatedBy,
-		StartTime:   resp.StartTime,
-		EndTime:     resp.EndTime,
-		Capacity:    resp.Capacity,
+		ID:          resp.Event.Id,
+		Name:        resp.Event.Name,
+		Description: resp.Event.Description,
+		Department:  resp.Event.Department,
+		CreatedBy:   resp.Event.CreatedBy,
+		StartTime:   resp.Event.StartTime.AsTime(),
+		EndTime:     resp.Event.EndTime.AsTime(),
+		Capacity:    &cap,
+		CreatedAt:   resp.Event.CreatedAt.AsTime(),
+		FileUrls:    fileUrls,
 	}, nil
 }
 
 // GetEvents is the resolver for the getEvents field.
 func (r *queryResolver) GetEvents(ctx context.Context, input GetEventsInput) ([]*Event, error) {
-	resp, err := r.Server.eventClient.GetEvents(ctx, event.EventFilter{
+	ctx = WithAuth(ctx)
+	resp, err := r.Server.eventClient.GetEvents(ctx, &pb.GetEventsRequest{
 		Skip: uint64(*input.Skip),
 		Take: uint64(*input.Take),
 	})
@@ -262,16 +325,28 @@ func (r *queryResolver) GetEvents(ctx context.Context, input GetEventsInput) ([]
 
 	var result []*Event
 
-	for _, e := range resp {
+	for _, e := range resp.Events {
+		var capacity *int
+		if e.Capacity != 0 {
+			c := int(e.Capacity)
+			capacity = &c
+		}
+
+		fileUrls := e.FileUrls
+		if fileUrls == nil {
+			fileUrls = []string{}
+		}
 		result = append(result, &Event{
-			ID:          e.ID,
-			Name:        e.EventName,
+			ID:          e.Id,
+			Name:        e.Name,
 			Description: e.Description,
 			Department:  e.Department,
 			CreatedBy:   e.CreatedBy,
-			StartTime:   e.StartTime,
-			EndTime:     e.EndTime,
-			Capacity:    e.Capacity,
+			StartTime:   e.StartTime.AsTime(),
+			EndTime:     e.EndTime.AsTime(),
+			Capacity:    capacity,
+			CreatedAt:   e.CreatedAt.AsTime(),
+			FileUrls:    fileUrls,
 		})
 	}
 
@@ -290,17 +365,21 @@ func (r *queryResolver) GetUserRegistrations(ctx context.Context, input GetUserR
 		take = uint32(*input.Take)
 	}
 
-	resp, err := r.Resolver.Server.attendeeClient.GetUserRegistrations(ctx, skip, take)
+	ctx = WithAuth(ctx)
+	resp, err := r.Resolver.Server.attendeeClient.GetUserRegistrations(ctx, &attendeepb.GetUserRegistrationsRequest{
+		Skip: uint64(skip),
+		Take: uint64(take),
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	var result []*MyEvent
-	for _, e := range resp {
+	for _, e := range resp.Events {
 		result = append(result, &MyEvent{
-			EventID:      e.EventID,
+			EventID:      e.EventId,
 			Status:       Status(e.Status),
-			RegisteredAt: e.RegisteredAt,
+			RegisteredAt: e.RegisteredAt.AsTime(),
 		})
 	}
 
@@ -319,19 +398,29 @@ func (r *queryResolver) GetEventAttendees(ctx context.Context, input GetEventAtt
 		take = uint32(*input.Take)
 	}
 
-	resp, err := r.Resolver.Server.attendeeClient.GetEventAttendees(ctx, input.EventID, skip, take)
+	ctx = WithAuth(ctx)
+	resp, err := r.Resolver.Server.attendeeClient.GetEventAttendees(ctx, &attendeepb.GetEventAttendeesRequest{
+		Skip:    uint64(skip),
+		Take:    uint64(take),
+		EventId: input.EventID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	var result []*Attendee
-	for _, e := range resp {
+	for _, e := range resp.Attendees {
+		var registeredAt *time.Time
+		if e.RegisteredAt != nil {
+			t := e.RegisteredAt.AsTime()
+			registeredAt = &t
+		}
 		result = append(result, &Attendee{
-			ID:           e.ID,
-			UserID:       e.UserID,
-			EventID:      e.UserID,
+			ID:           e.Id,
+			UserID:       e.UserId,
+			EventID:      e.EventId,
 			Status:       Status(e.Status),
-			RegisteredAt: &e.RegisteredAt,
+			RegisteredAt: registeredAt,
 		})
 	}
 
@@ -340,15 +429,18 @@ func (r *queryResolver) GetEventAttendees(ctx context.Context, input GetEventAtt
 
 // ExportAttendeesTable is the resolver for the exportAttendeesTable field.
 func (r *queryResolver) ExportAttendeesTable(ctx context.Context, eventID string) (*ExcelFile, error) {
-	data, filename, err := r.Resolver.Server.attendeeClient.ExportAttendeeTable(ctx, eventID)
+	ctx = WithAuth(ctx)
+	resp, err := r.Resolver.Server.attendeeClient.ExportAttendeesTable(ctx, &attendeepb.ExportAttendeesTableRequest{
+		EventId: eventID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	encoded := base64.StdEncoding.EncodeToString(data)
+	encoded := base64.StdEncoding.EncodeToString(resp.File)
 
 	return &ExcelFile{
-		Filename: filename,
+		Filename: resp.Filename,
 		Content:  encoded,
 	}, nil
 }

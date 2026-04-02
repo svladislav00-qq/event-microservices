@@ -138,7 +138,7 @@ func (s *serverAttendee) GetEventAttendees(ctx context.Context, req *pb.GetEvent
 	return &pb.GetEventAttendeesResponse{Attendees: pbAttendees}, nil
 }
 
-func (s *serverAttendee) ExportAttendeesTable(ctx context.Context, req *pb.ExportAttendeeTableRequest) (*pb.ExportAttendeeTableResponse, error) {
+func (s *serverAttendee) ExportAttendeesTable(ctx context.Context, req *pb.ExportAttendeesTableRequest) (*pb.ExportAttendeesTableResponse, error) {
 	if req.GetEventId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "event_id is required")
 	}
@@ -165,7 +165,7 @@ func (s *serverAttendee) ExportAttendeesTable(ctx context.Context, req *pb.Expor
 		return nil, status.Error(codes.Internal, "failed to generate excel file")
 	}
 
-	return &pb.ExportAttendeeTableResponse{
+	return &pb.ExportAttendeesTableResponse{
 		File:     buf.Bytes(),
 		Filename: fmt.Sprintf("attendees_%s.xlsx", req.GetEventId()),
 	}, nil

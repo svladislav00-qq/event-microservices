@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package pb;
 
-option go_package = "./pb";
+option go_package = "github.com/svladislav00-qq/event-microservices/attendee/pb";
 
 import "google/protobuf/timestamp.proto";
 
@@ -31,7 +31,7 @@ service AttendeeService {
     rpc CancelRegistration (CancelRegistrationRequest) returns (CancelRegistrationResponse){}
     rpc GetUserRegistrations (GetUserRegistrationsRequest) returns (GetUserRegistrationsResponse){}
     rpc GetEventAttendees (GetEventAttendeesRequest) returns (GetEventAttendeesResponse){}
-    rpc ExportAttendeesTable (ExportAttendeeTableRequest) returns (ExportAttendeeTableResponse){}
+    rpc ExportAttendeesTable (ExportAttendeesTableRequest) returns (ExportAttendeesTableResponse){}
 }
 
 message RegisterToEventRequest {
@@ -68,11 +68,11 @@ message GetEventAttendeesResponse {
     repeated Attendee attendees = 1;
 }
 
-message ExportAttendeeTableRequest {
+message ExportAttendeesTableRequest {
     string event_id = 1;
 }
 
-message ExportAttendeeTableResponse {
+message ExportAttendeesTableResponse {
     bytes file = 1;
     string filename = 2;
 }

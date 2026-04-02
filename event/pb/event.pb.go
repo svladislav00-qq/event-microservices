@@ -974,7 +974,7 @@ const file_event_proto_rawDesc = "" +
 	"\vDeleteEvent\x12\x16.pb.DeleteEventRequest\x1a\x17.pb.DeleteEventResponse\"\x00\x127\n" +
 	"\bGetEvent\x12\x13.pb.GetEventRequest\x1a\x14.pb.GetEventResponse\"\x00\x12:\n" +
 	"\tGetEvents\x12\x14.pb.GetEventsRequest\x1a\x15.pb.GetEventsResponse\"\x00\x12@\n" +
-	"\vUploadFiles\x12\x16.pb.UploadFilesRequest\x1a\x17.pb.UploadFilesResponse\"\x00B\x06Z\x04./pbb\x06proto3"
+	"\vUploadFiles\x12\x16.pb.UploadFilesRequest\x1a\x17.pb.UploadFilesResponse\"\x00B9Z7github.com/svladislav00-qq/event-microservices/event/pbb\x06proto3"
 
 var (
 	file_event_proto_rawDescOnce sync.Once

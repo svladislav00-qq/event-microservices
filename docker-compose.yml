@@ -1,11 +1,83 @@
-version: '3.7'
+
 
 services:
-  auth:
-  event:
-  attendee:
-  graphql:
-  auth_db:
-  event_db:
-  attendee_db:
+  postgres:
+    image: postgres:15
+    container_name: event_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   minio:
+    image: minio/minio
+    container_name: event_minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  auth:
+    build:
+      context: .
+      dockerfile: auth/app.dockerfile
+    container_name: auth_service
+    env_file:
+      - ./auth/.env
+    depends_on:
+      - postgres
+    ports:
+      - "44044:44044"
+
+  event:
+    build:
+      context: .
+      dockerfile: event/app.dockerfile
+    container_name: event_service
+    env_file:
+      - ./event/.env
+    depends_on:
+      - postgres
+      - minio
+    ports:
+      - "44045:44045"
+
+  attendee:
+    build:
+      context: .
+      dockerfile: attendee/app.dockerfile
+    container_name: attendee_service
+    env_file:
+      - ./attendee/.env
+    depends_on:
+      - postgres
+      - auth
+    ports:
+      - "44046:44046"
+
+  graphql:
+    build:
+      context: .
+      dockerfile: graphql/app.dockerfile
+    container_name: graphql_gateway
+    env_file:
+      - ./graphql/.env
+    depends_on:
+      - auth
+      - event
+      - attendee
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
+  minio_data:

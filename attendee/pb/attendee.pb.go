@@ -583,27 +583,27 @@ func (x *GetEventAttendeesResponse) GetAttendees() []*Attendee {
 	return nil
 }
 
-type ExportAttendeeTableRequest struct {
+type ExportAttendeesTableRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ExportAttendeeTableRequest) Reset() {
-	*x = ExportAttendeeTableRequest{}
+func (x *ExportAttendeesTableRequest) Reset() {
+	*x = ExportAttendeesTableRequest{}
 	mi := &file_attendee_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ExportAttendeeTableRequest) String() string {
+func (x *ExportAttendeesTableRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ExportAttendeeTableRequest) ProtoMessage() {}
+func (*ExportAttendeesTableRequest) ProtoMessage() {}
 
-func (x *ExportAttendeeTableRequest) ProtoReflect() protoreflect.Message {
+func (x *ExportAttendeesTableRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_attendee_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -615,19 +615,19 @@ func (x *ExportAttendeeTableRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ExportAttendeeTableRequest.ProtoReflect.Descriptor instead.
-func (*ExportAttendeeTableRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ExportAttendeesTableRequest.ProtoReflect.Descriptor instead.
+func (*ExportAttendeesTableRequest) Descriptor() ([]byte, []int) {
 	return file_attendee_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *ExportAttendeeTableRequest) GetEventId() string {
+func (x *ExportAttendeesTableRequest) GetEventId() string {
 	if x != nil {
 		return x.EventId
 	}
 	return ""
 }
 
-type ExportAttendeeTableResponse struct {
+type ExportAttendeesTableResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	File          []byte                 `protobuf:"bytes,1,opt,name=file,proto3" json:"file,omitempty"`
 	Filename      string                 `protobuf:"bytes,2,opt,name=filename,proto3" json:"filename,omitempty"`
@@ -635,20 +635,20 @@ type ExportAttendeeTableResponse struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ExportAttendeeTableResponse) Reset() {
-	*x = ExportAttendeeTableResponse{}
+func (x *ExportAttendeesTableResponse) Reset() {
+	*x = ExportAttendeesTableResponse{}
 	mi := &file_attendee_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ExportAttendeeTableResponse) String() string {
+func (x *ExportAttendeesTableResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ExportAttendeeTableResponse) ProtoMessage() {}
+func (*ExportAttendeesTableResponse) ProtoMessage() {}
 
-func (x *ExportAttendeeTableResponse) ProtoReflect() protoreflect.Message {
+func (x *ExportAttendeesTableResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_attendee_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -660,19 +660,19 @@ func (x *ExportAttendeeTableResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ExportAttendeeTableResponse.ProtoReflect.Descriptor instead.
-func (*ExportAttendeeTableResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ExportAttendeesTableResponse.ProtoReflect.Descriptor instead.
+func (*ExportAttendeesTableResponse) Descriptor() ([]byte, []int) {
 	return file_attendee_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *ExportAttendeeTableResponse) GetFile() []byte {
+func (x *ExportAttendeesTableResponse) GetFile() []byte {
 	if x != nil {
 		return x.File
 	}
 	return nil
 }
 
-func (x *ExportAttendeeTableResponse) GetFilename() string {
+func (x *ExportAttendeesTableResponse) GetFilename() string {
 	if x != nil {
 		return x.Filename
 	}
@@ -714,22 +714,22 @@ const file_attendee_proto_rawDesc = "" +
 	"\x04take\x18\x02 \x01(\x04R\x04take\x12\x19\n" +
 	"\bevent_id\x18\x03 \x01(\tR\aeventId\"G\n" +
 	"\x19GetEventAttendeesResponse\x12*\n" +
-	"\tattendees\x18\x01 \x03(\v2\f.pb.AttendeeR\tattendees\"7\n" +
-	"\x1aExportAttendeeTableRequest\x12\x19\n" +
-	"\bevent_id\x18\x01 \x01(\tR\aeventId\"M\n" +
-	"\x1bExportAttendeeTableResponse\x12\x12\n" +
+	"\tattendees\x18\x01 \x03(\v2\f.pb.AttendeeR\tattendees\"8\n" +
+	"\x1bExportAttendeesTableRequest\x12\x19\n" +
+	"\bevent_id\x18\x01 \x01(\tR\aeventId\"N\n" +
+	"\x1cExportAttendeesTableResponse\x12\x12\n" +
 	"\x04file\x18\x01 \x01(\fR\x04file\x12\x1a\n" +
 	"\bfilename\x18\x02 \x01(\tR\bfilename*H\n" +
 	"\x06Status\x12\x12\n" +
 	"\x0eSTATUS_UNKNOWN\x10\x00\x12\x15\n" +
 	"\x11STATUS_REGISTERED\x10\x01\x12\x13\n" +
-	"\x0fSTATUS_CANCELED\x10\x022\xc2\x03\n" +
+	"\x0fSTATUS_CANCELED\x10\x022\xc4\x03\n" +
 	"\x0fAttendeeService\x12L\n" +
 	"\x0fRegisterToEvent\x12\x1a.pb.RegisterToEventRequest\x1a\x1b.pb.RegisterToEventResponse\"\x00\x12U\n" +
 	"\x12CancelRegistration\x12\x1d.pb.CancelRegistrationRequest\x1a\x1e.pb.CancelRegistrationResponse\"\x00\x12[\n" +
 	"\x14GetUserRegistrations\x12\x1f.pb.GetUserRegistrationsRequest\x1a .pb.GetUserRegistrationsResponse\"\x00\x12R\n" +
-	"\x11GetEventAttendees\x12\x1c.pb.GetEventAttendeesRequest\x1a\x1d.pb.GetEventAttendeesResponse\"\x00\x12Y\n" +
-	"\x14ExportAttendeesTable\x12\x1e.pb.ExportAttendeeTableRequest\x1a\x1f.pb.ExportAttendeeTableResponse\"\x00B\x06Z\x04./pbb\x06proto3"
+	"\x11GetEventAttendees\x12\x1c.pb.GetEventAttendeesRequest\x1a\x1d.pb.GetEventAttendeesResponse\"\x00\x12[\n" +
+	"\x14ExportAttendeesTable\x12\x1f.pb.ExportAttendeesTableRequest\x1a .pb.ExportAttendeesTableResponse\"\x00B<Z:github.com/svladislav00-qq/event-microservices/attendee/pbb\x06proto3"
 
 var (
 	file_attendee_proto_rawDescOnce sync.Once
@@ -757,8 +757,8 @@ var file_attendee_proto_goTypes = []any{
 	(*GetUserRegistrationsResponse)(nil), // 8: pb.GetUserRegistrationsResponse
 	(*GetEventAttendeesRequest)(nil),     // 9: pb.GetEventAttendeesRequest
 	(*GetEventAttendeesResponse)(nil),    // 10: pb.GetEventAttendeesResponse
-	(*ExportAttendeeTableRequest)(nil),   // 11: pb.ExportAttendeeTableRequest
-	(*ExportAttendeeTableResponse)(nil),  // 12: pb.ExportAttendeeTableResponse
+	(*ExportAttendeesTableRequest)(nil),  // 11: pb.ExportAttendeesTableRequest
+	(*ExportAttendeesTableResponse)(nil), // 12: pb.ExportAttendeesTableResponse
 	(*timestamppb.Timestamp)(nil),        // 13: google.protobuf.Timestamp
 }
 var file_attendee_proto_depIdxs = []int32{
@@ -773,12 +773,12 @@ var file_attendee_proto_depIdxs = []int32{
 	5,  // 8: pb.AttendeeService.CancelRegistration:input_type -> pb.CancelRegistrationRequest
 	7,  // 9: pb.AttendeeService.GetUserRegistrations:input_type -> pb.GetUserRegistrationsRequest
 	9,  // 10: pb.AttendeeService.GetEventAttendees:input_type -> pb.GetEventAttendeesRequest
-	11, // 11: pb.AttendeeService.ExportAttendeesTable:input_type -> pb.ExportAttendeeTableRequest
+	11, // 11: pb.AttendeeService.ExportAttendeesTable:input_type -> pb.ExportAttendeesTableRequest
 	4,  // 12: pb.AttendeeService.RegisterToEvent:output_type -> pb.RegisterToEventResponse
 	6,  // 13: pb.AttendeeService.CancelRegistration:output_type -> pb.CancelRegistrationResponse
 	8,  // 14: pb.AttendeeService.GetUserRegistrations:output_type -> pb.GetUserRegistrationsResponse
 	10, // 15: pb.AttendeeService.GetEventAttendees:output_type -> pb.GetEventAttendeesResponse
-	12, // 16: pb.AttendeeService.ExportAttendeesTable:output_type -> pb.ExportAttendeeTableResponse
+	12, // 16: pb.AttendeeService.ExportAttendeesTable:output_type -> pb.ExportAttendeesTableResponse
 	12, // [12:17] is the sub-list for method output_type
 	7,  // [7:12] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name

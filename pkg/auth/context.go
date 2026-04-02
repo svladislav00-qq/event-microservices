@@ -1,6 +1,9 @@
 package authorization
 
-import "context"
+import (
+	"context"
+	"net/http"
+)
 
 type userContextKey struct{}
 
@@ -16,4 +19,11 @@ func UserFromContext(ctx context.Context) (*User, bool) {
 func TokenFromContext(ctx context.Context) (string, bool) {
 	token, ok := ctx.Value("token").(string)
 	return token, ok
+}
+
+func GetAuthHeader(ctx context.Context) string {
+	if headers, ok := ctx.Value("headers").(http.Header); ok {
+		return headers.Get("authorization")
+	}
+	return ""
 }

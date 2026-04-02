@@ -739,7 +739,7 @@ const file_auth_proto_rawDesc = "" +
 	"\x05Login\x12\x10.pb.LoginRequest\x1a\x11.pb.LoginResponse\"\x00\x12U\n" +
 	"\x12PromoteToModerator\x12\x1d.pb.PromoteToModeratorRequest\x1a\x1e.pb.PromoteToModeratorResponse\"\x00\x12.\n" +
 	"\x05GetMe\x12\x10.pb.GetMeRequest\x1a\x11.pb.GetMeResponse\"\x00\x12F\n" +
-	"\rGetUsersByIDs\x12\x18.pb.GetUsersByIDsRequest\x1a\x19.pb.GetUsersByIDsResponse\"\x00B\x06Z\x04./pbb\x06proto3"
+	"\rGetUsersByIDs\x12\x18.pb.GetUsersByIDsRequest\x1a\x19.pb.GetUsersByIDsResponse\"\x00B8Z6github.com/svladislav00-qq/event-microservices/auth/pbb\x06proto3"
 
 var (
 	file_auth_proto_rawDescOnce sync.Once

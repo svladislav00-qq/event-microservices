@@ -53,7 +53,9 @@ type Event struct {
 	CreatedBy   string    `json:"createdBy"`
 	StartTime   time.Time `json:"startTime"`
 	EndTime     time.Time `json:"endTime"`
+	CreatedAt   time.Time `json:"createdAt"`
 	Capacity    *int      `json:"capacity,omitempty"`
+	FileUrls    []string  `json:"fileUrls,omitempty"`
 }
 
 type EventIDInput struct {

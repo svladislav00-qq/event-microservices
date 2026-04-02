@@ -1,6 +1,10 @@
 package graphql
 
-import "net/http"
+import (
+	"net/http"
+
+	attendeepb "github.com/svladislav00-qq/event-microservices/attendee/pb"
+)
 
 func DownloadAttendeesHandler(server *Server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -10,15 +14,17 @@ func DownloadAttendeesHandler(server *Server) http.HandlerFunc {
 			return
 		}
 
-		data, filename, err := server.attendeeClient.ExportAttendeeTable(r.Context(), eventID)
+		resp, err := server.attendeeClient.ExportAttendeesTable(r.Context(), &attendeepb.ExportAttendeesTableRequest{
+			EventId: eventID,
+		})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		w.Header().Set("Content-Disposition", "attachment; filename="+filename)
+		w.Header().Set("Content-Disposition", "attachment; filename="+resp.Filename)
 		w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-		w.Write(data)
+		w.Write(resp.File)
 	}
 }

@@ -34,7 +34,7 @@ type AttendeeServiceClient interface {
 	CancelRegistration(ctx context.Context, in *CancelRegistrationRequest, opts ...grpc.CallOption) (*CancelRegistrationResponse, error)
 	GetUserRegistrations(ctx context.Context, in *GetUserRegistrationsRequest, opts ...grpc.CallOption) (*GetUserRegistrationsResponse, error)
 	GetEventAttendees(ctx context.Context, in *GetEventAttendeesRequest, opts ...grpc.CallOption) (*GetEventAttendeesResponse, error)
-	ExportAttendeesTable(ctx context.Context, in *ExportAttendeeTableRequest, opts ...grpc.CallOption) (*ExportAttendeeTableResponse, error)
+	ExportAttendeesTable(ctx context.Context, in *ExportAttendeesTableRequest, opts ...grpc.CallOption) (*ExportAttendeesTableResponse, error)
 }
 
 type attendeeServiceClient struct {
@@ -85,9 +85,9 @@ func (c *attendeeServiceClient) GetEventAttendees(ctx context.Context, in *GetEv
 	return out, nil
 }
 
-func (c *attendeeServiceClient) ExportAttendeesTable(ctx context.Context, in *ExportAttendeeTableRequest, opts ...grpc.CallOption) (*ExportAttendeeTableResponse, error) {
+func (c *attendeeServiceClient) ExportAttendeesTable(ctx context.Context, in *ExportAttendeesTableRequest, opts ...grpc.CallOption) (*ExportAttendeesTableResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ExportAttendeeTableResponse)
+	out := new(ExportAttendeesTableResponse)
 	err := c.cc.Invoke(ctx, AttendeeService_ExportAttendeesTable_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -103,7 +103,7 @@ type AttendeeServiceServer interface {
 	CancelRegistration(context.Context, *CancelRegistrationRequest) (*CancelRegistrationResponse, error)
 	GetUserRegistrations(context.Context, *GetUserRegistrationsRequest) (*GetUserRegistrationsResponse, error)
 	GetEventAttendees(context.Context, *GetEventAttendeesRequest) (*GetEventAttendeesResponse, error)
-	ExportAttendeesTable(context.Context, *ExportAttendeeTableRequest) (*ExportAttendeeTableResponse, error)
+	ExportAttendeesTable(context.Context, *ExportAttendeesTableRequest) (*ExportAttendeesTableResponse, error)
 	mustEmbedUnimplementedAttendeeServiceServer()
 }
 
@@ -126,7 +126,7 @@ func (UnimplementedAttendeeServiceServer) GetUserRegistrations(context.Context, 
 func (UnimplementedAttendeeServiceServer) GetEventAttendees(context.Context, *GetEventAttendeesRequest) (*GetEventAttendeesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetEventAttendees not implemented")
 }
-func (UnimplementedAttendeeServiceServer) ExportAttendeesTable(context.Context, *ExportAttendeeTableRequest) (*ExportAttendeeTableResponse, error) {
+func (UnimplementedAttendeeServiceServer) ExportAttendeesTable(context.Context, *ExportAttendeesTableRequest) (*ExportAttendeesTableResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ExportAttendeesTable not implemented")
 }
 func (UnimplementedAttendeeServiceServer) mustEmbedUnimplementedAttendeeServiceServer() {}
@@ -223,7 +223,7 @@ func _AttendeeService_GetEventAttendees_Handler(srv interface{}, ctx context.Con
 }
 
 func _AttendeeService_ExportAttendeesTable_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ExportAttendeeTableRequest)
+	in := new(ExportAttendeesTableRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -235,7 +235,7 @@ func _AttendeeService_ExportAttendeesTable_Handler(srv interface{}, ctx context.
 		FullMethod: AttendeeService_ExportAttendeesTable_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AttendeeServiceServer).ExportAttendeesTable(ctx, req.(*ExportAttendeeTableRequest))
+		return srv.(AttendeeServiceServer).ExportAttendeesTable(ctx, req.(*ExportAttendeesTableRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

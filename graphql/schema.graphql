@@ -35,8 +35,11 @@ type Event {
 
   startTime: Time!
   endTime: Time!
+  createdAt: Time!
 
   capacity: Int
+  fileUrls: [String!]
+
 }
 
 input RegisterInput {
