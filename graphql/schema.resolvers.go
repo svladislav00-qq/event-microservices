@@ -51,7 +51,7 @@ func (r *mutationResolver) Register(ctx context.Context, input RegisterInput) (*
 		ID:        resp.Account.Id,
 		Email:     resp.Account.Email,
 		Username:  resp.Account.Username,
-		Role:      Role(resp.Account.Role),
+		Role:      Role(resp.Account.Role.String()),
 		CreatedAt: resp.Account.CreatedAt.AsTime(),
 		UpdatedAt: resp.Account.UpdatedAt.AsTime(),
 	}, nil
@@ -235,7 +235,7 @@ func (r *mutationResolver) RegisterToEvent(ctx context.Context, input EventIDInp
 		ID:           resp.Attendee.Id,
 		UserID:       resp.Attendee.UserId,
 		EventID:      resp.Attendee.EventId,
-		Status:       Status(resp.Attendee.Status),
+		Status:       Status(resp.Attendee.Status.String()),
 		RegisteredAt: registeredAt,
 	}, nil
 }
