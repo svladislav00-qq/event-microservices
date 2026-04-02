@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/svladislav00-qq/event-microservices/attendee/pb"
+	authorization "github.com/svladislav00-qq/event-microservices/pkg/auth"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/metadata"
 )
 
 type Client struct {
@@ -34,16 +34,21 @@ func (c *Client) Close() {
 }
 
 func (c *Client) RegisterToEvent(ctx context.Context, eventID string) (*Attendee, error) {
-	userID, ok := ctx.Value(userIDKey).(string)
+	token, ok := authorization.TokenFromContext(ctx)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "no user in context")
+		return nil, fmt.Errorf("no token in context")
 	}
+
+	md := metadata.New(map[string]string{
+		"authorization": "Bearer " + token,
+	})
+
+	ctx = metadata.NewOutgoingContext(ctx, md)
 
 	r, err := c.service.RegisterToEvent(
 		ctx,
 		&pb.RegisterToEventRequest{
 			EventId: eventID,
-			UserId:  userID,
 		},
 	)
 	if err != nil {
@@ -58,16 +63,20 @@ func (c *Client) RegisterToEvent(ctx context.Context, eventID string) (*Attendee
 }
 
 func (c *Client) CancelRegistration(ctx context.Context, eventID string) error {
-	userID, ok := ctx.Value(userIDKey).(string)
+	token, ok := authorization.TokenFromContext(ctx)
 	if !ok {
-		return status.Error(codes.Unauthenticated, "no user in context")
+		return fmt.Errorf("no token in context")
 	}
 
+	md := metadata.New(map[string]string{
+		"authorization": "Bearer " + token,
+	})
+
+	ctx = metadata.NewOutgoingContext(ctx, md)
 	_, err := c.service.CancelRegistration(
 		ctx,
 		&pb.CancelRegistrationRequest{
 			EventId: eventID,
-			UserId:  userID,
 		},
 	)
 	if err != nil {
@@ -78,17 +87,22 @@ func (c *Client) CancelRegistration(ctx context.Context, eventID string) error {
 }
 
 func (c *Client) GetUserRegistrations(ctx context.Context, skip uint32, take uint32) ([]Attendee, error) {
-	userID, ok := ctx.Value(userIDKey).(string)
+	token, ok := authorization.TokenFromContext(ctx)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "no user in context")
+		return nil, fmt.Errorf("no token in context")
 	}
+
+	md := metadata.New(map[string]string{
+		"authorization": "Bearer " + token,
+	})
+
+	ctx = metadata.NewOutgoingContext(ctx, md)
 
 	resp, err := c.service.GetUserRegistrations(
 		ctx,
 		&pb.GetUserRegistrationsRequest{
-			Skip:   uint64(skip),
-			Take:   uint64(take),
-			UserId: userID,
+			Skip: uint64(skip),
+			Take: uint64(take),
 		},
 	)
 	if err != nil {
@@ -109,6 +123,17 @@ func (c *Client) GetUserRegistrations(ctx context.Context, skip uint32, take uin
 }
 
 func (c *Client) GetEventAttendees(ctx context.Context, eventID string, skip uint32, take uint32) ([]Attendee, error) {
+	token, ok := authorization.TokenFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("no token in context")
+	}
+
+	md := metadata.New(map[string]string{
+		"authorization": "Bearer " + token,
+	})
+
+	ctx = metadata.NewOutgoingContext(ctx, md)
+
 	resp, err := c.service.GetEventAttendees(
 		ctx,
 		&pb.GetEventAttendeesRequest{
@@ -136,6 +161,17 @@ func (c *Client) GetEventAttendees(ctx context.Context, eventID string, skip uin
 }
 
 func (c *Client) ExportAttendeeTable(ctx context.Context, eventID string) ([]byte, string, error) {
+	token, ok := authorization.TokenFromContext(ctx)
+	if !ok {
+		return nil, "", fmt.Errorf("no token in context")
+	}
+
+	md := metadata.New(map[string]string{
+		"authorization": "Bearer " + token,
+	})
+
+	ctx = metadata.NewOutgoingContext(ctx, md)
+
 	resp, err := c.service.ExportAttendeesTable(
 		ctx,
 		&pb.ExportAttendeeTableRequest{

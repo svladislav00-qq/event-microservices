@@ -47,6 +47,14 @@ type ComplexityRoot struct {
 		Username   func(childComplexity int) int
 	}
 
+	Attendee struct {
+		EventID      func(childComplexity int) int
+		ID           func(childComplexity int) int
+		RegisteredAt func(childComplexity int) int
+		Status       func(childComplexity int) int
+		UserID       func(childComplexity int) int
+	}
+
 	AuthPayload struct {
 		Token func(childComplexity int) int
 	}
@@ -62,21 +70,37 @@ type ComplexityRoot struct {
 		StartTime   func(childComplexity int) int
 	}
 
+	ExcelFile struct {
+		Content  func(childComplexity int) int
+		Filename func(childComplexity int) int
+	}
+
 	Mutation struct {
+		CancelRegistration func(childComplexity int, input EventIDInput) int
 		CreateEvent        func(childComplexity int, input CreateEventInput) int
 		DeleteEvent        func(childComplexity int, input DeleteEventInput) int
 		Login              func(childComplexity int, input LoginInput) int
 		PromoteToModerator func(childComplexity int, input PromoteToModeratorInput) int
 		Register           func(childComplexity int, input RegisterInput) int
+		RegisterToEvent    func(childComplexity int, input EventIDInput) int
 		UpdateEvent        func(childComplexity int, input UpdateEventInput) int
 		UploadFiles        func(childComplexity int, id string, files []*graphql.Upload) int
 	}
 
+	MyEvent struct {
+		EventID      func(childComplexity int) int
+		RegisteredAt func(childComplexity int) int
+		Status       func(childComplexity int) int
+	}
+
 	Query struct {
-		GetEvent  func(childComplexity int, input GetEventInput) int
-		GetEvents func(childComplexity int, input GetEventsInput) int
-		Me        func(childComplexity int) int
-		Ping      func(childComplexity int) int
+		ExportAttendeesTable func(childComplexity int, eventID string) int
+		GetEvent             func(childComplexity int, input GetEventInput) int
+		GetEventAttendees    func(childComplexity int, input GetEventAttendeesInput) int
+		GetEvents            func(childComplexity int, input GetEventsInput) int
+		GetUserRegistrations func(childComplexity int, input GetUserRegistrationsInput) int
+		Me                   func(childComplexity int) int
+		Ping                 func(childComplexity int) int
 	}
 
 	UploadFileResponse struct {
@@ -93,12 +117,17 @@ type MutationResolver interface {
 	UpdateEvent(ctx context.Context, input UpdateEventInput) (*Event, error)
 	DeleteEvent(ctx context.Context, input DeleteEventInput) (bool, error)
 	UploadFiles(ctx context.Context, id string, files []*graphql.Upload) ([]*UploadFileResponse, error)
+	RegisterToEvent(ctx context.Context, input EventIDInput) (*Attendee, error)
+	CancelRegistration(ctx context.Context, input EventIDInput) (bool, error)
 }
 type QueryResolver interface {
 	Ping(ctx context.Context) (string, error)
 	Me(ctx context.Context) (*Account, error)
 	GetEvent(ctx context.Context, input GetEventInput) (*Event, error)
 	GetEvents(ctx context.Context, input GetEventsInput) ([]*Event, error)
+	GetUserRegistrations(ctx context.Context, input GetUserRegistrationsInput) ([]*MyEvent, error)
+	GetEventAttendees(ctx context.Context, input GetEventAttendeesInput) ([]*Attendee, error)
+	ExportAttendeesTable(ctx context.Context, eventID string) (*ExcelFile, error)
 }
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -164,6 +193,37 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Account.Username(childComplexity), true
 
+	case "Attendee.eventID":
+		if e.ComplexityRoot.Attendee.EventID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Attendee.EventID(childComplexity), true
+	case "Attendee.id":
+		if e.ComplexityRoot.Attendee.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Attendee.ID(childComplexity), true
+	case "Attendee.registeredAt":
+		if e.ComplexityRoot.Attendee.RegisteredAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Attendee.RegisteredAt(childComplexity), true
+	case "Attendee.status":
+		if e.ComplexityRoot.Attendee.Status == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Attendee.Status(childComplexity), true
+	case "Attendee.userID":
+		if e.ComplexityRoot.Attendee.UserID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Attendee.UserID(childComplexity), true
+
 	case "AuthPayload.token":
 		if e.ComplexityRoot.AuthPayload.Token == nil {
 			break
@@ -220,6 +280,30 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Event.StartTime(childComplexity), true
 
+	case "ExcelFile.content":
+		if e.ComplexityRoot.ExcelFile.Content == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ExcelFile.Content(childComplexity), true
+	case "ExcelFile.filename":
+		if e.ComplexityRoot.ExcelFile.Filename == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ExcelFile.Filename(childComplexity), true
+
+	case "Mutation.cancelRegistration":
+		if e.ComplexityRoot.Mutation.CancelRegistration == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_cancelRegistration_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.CancelRegistration(childComplexity, args["input"].(EventIDInput)), true
 	case "Mutation.createEvent":
 		if e.ComplexityRoot.Mutation.CreateEvent == nil {
 			break
@@ -275,6 +359,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.Register(childComplexity, args["input"].(RegisterInput)), true
+	case "Mutation.registerToEvent":
+		if e.ComplexityRoot.Mutation.RegisterToEvent == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_registerToEvent_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.RegisterToEvent(childComplexity, args["input"].(EventIDInput)), true
 	case "Mutation.updateEvent":
 		if e.ComplexityRoot.Mutation.UpdateEvent == nil {
 			break
@@ -298,6 +393,36 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Mutation.UploadFiles(childComplexity, args["id"].(string), args["files"].([]*graphql.Upload)), true
 
+	case "MyEvent.eventID":
+		if e.ComplexityRoot.MyEvent.EventID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MyEvent.EventID(childComplexity), true
+	case "MyEvent.registeredAt":
+		if e.ComplexityRoot.MyEvent.RegisteredAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MyEvent.RegisteredAt(childComplexity), true
+	case "MyEvent.status":
+		if e.ComplexityRoot.MyEvent.Status == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MyEvent.Status(childComplexity), true
+
+	case "Query.exportAttendeesTable":
+		if e.ComplexityRoot.Query.ExportAttendeesTable == nil {
+			break
+		}
+
+		args, err := ec.field_Query_exportAttendeesTable_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.ExportAttendeesTable(childComplexity, args["eventID"].(string)), true
 	case "Query.getEvent":
 		if e.ComplexityRoot.Query.GetEvent == nil {
 			break
@@ -309,6 +434,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.GetEvent(childComplexity, args["input"].(GetEventInput)), true
+	case "Query.getEventAttendees":
+		if e.ComplexityRoot.Query.GetEventAttendees == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getEventAttendees_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.GetEventAttendees(childComplexity, args["input"].(GetEventAttendeesInput)), true
 	case "Query.getEvents":
 		if e.ComplexityRoot.Query.GetEvents == nil {
 			break
@@ -320,6 +456,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.GetEvents(childComplexity, args["input"].(GetEventsInput)), true
+	case "Query.getUserRegistrations":
+		if e.ComplexityRoot.Query.GetUserRegistrations == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getUserRegistrations_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.GetUserRegistrations(childComplexity, args["input"].(GetUserRegistrationsInput)), true
 
 	case "Query.me":
 		if e.ComplexityRoot.Query.Me == nil {
@@ -357,8 +504,11 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputCreateEventInput,
 		ec.unmarshalInputDeleteEventInput,
+		ec.unmarshalInputEventIDInput,
+		ec.unmarshalInputGetEventAttendeesInput,
 		ec.unmarshalInputGetEventInput,
 		ec.unmarshalInputGetEventsInput,
+		ec.unmarshalInputGetUserRegistrationsInput,
 		ec.unmarshalInputLoginInput,
 		ec.unmarshalInputPromoteToModeratorInput,
 		ec.unmarshalInputRegisterInput,
@@ -457,6 +607,17 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_cancelRegistration_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNEventIDInput2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐEventIDInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createEvent_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -494,6 +655,17 @@ func (ec *executionContext) field_Mutation_promoteToModerator_args(ctx context.C
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNPromoteToModeratorInput2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐPromoteToModeratorInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_registerToEvent_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNEventIDInput2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐEventIDInput)
 	if err != nil {
 		return nil, err
 	}
@@ -550,6 +722,28 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_exportAttendeesTable_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "eventID", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["eventID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getEventAttendees_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNGetEventAttendeesInput2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐGetEventAttendeesInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_getEvent_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -565,6 +759,17 @@ func (ec *executionContext) field_Query_getEvents_args(ctx context.Context, rawA
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNGetEventsInput2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐGetEventsInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getUserRegistrations_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNGetUserRegistrationsInput2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐGetUserRegistrationsInput)
 	if err != nil {
 		return nil, err
 	}
@@ -856,6 +1061,151 @@ func (ec *executionContext) fieldContext_Account_deletedAt(_ context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _Attendee_id(ctx context.Context, field graphql.CollectedField, obj *Attendee) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Attendee_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Attendee_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Attendee",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Attendee_eventID(ctx context.Context, field graphql.CollectedField, obj *Attendee) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Attendee_eventID,
+		func(ctx context.Context) (any, error) {
+			return obj.EventID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Attendee_eventID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Attendee",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Attendee_userID(ctx context.Context, field graphql.CollectedField, obj *Attendee) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Attendee_userID,
+		func(ctx context.Context) (any, error) {
+			return obj.UserID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Attendee_userID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Attendee",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Attendee_status(ctx context.Context, field graphql.CollectedField, obj *Attendee) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Attendee_status,
+		func(ctx context.Context) (any, error) {
+			return obj.Status, nil
+		},
+		nil,
+		ec.marshalNStatus2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐStatus,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Attendee_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Attendee",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Status does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Attendee_registeredAt(ctx context.Context, field graphql.CollectedField, obj *Attendee) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Attendee_registeredAt,
+		func(ctx context.Context) (any, error) {
+			return obj.RegisteredAt, nil
+		},
+		nil,
+		ec.marshalOTime2ᚖtimeᚐTime,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Attendee_registeredAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Attendee",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _AuthPayload_token(ctx context.Context, field graphql.CollectedField, obj *AuthPayload) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1112,6 +1462,64 @@ func (ec *executionContext) fieldContext_Event_capacity(_ context.Context, field
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExcelFile_filename(ctx context.Context, field graphql.CollectedField, obj *ExcelFile) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExcelFile_filename,
+		func(ctx context.Context) (any, error) {
+			return obj.Filename, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExcelFile_filename(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExcelFile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExcelFile_content(ctx context.Context, field graphql.CollectedField, obj *ExcelFile) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExcelFile_content,
+		func(ctx context.Context) (any, error) {
+			return obj.Content, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExcelFile_content(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExcelFile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1486,6 +1894,187 @@ func (ec *executionContext) fieldContext_Mutation_uploadFiles(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_registerToEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_registerToEvent,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().RegisterToEvent(ctx, fc.Args["input"].(EventIDInput))
+		},
+		nil,
+		ec.marshalNAttendee2ᚖgithubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐAttendee,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_registerToEvent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Attendee_id(ctx, field)
+			case "eventID":
+				return ec.fieldContext_Attendee_eventID(ctx, field)
+			case "userID":
+				return ec.fieldContext_Attendee_userID(ctx, field)
+			case "status":
+				return ec.fieldContext_Attendee_status(ctx, field)
+			case "registeredAt":
+				return ec.fieldContext_Attendee_registeredAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Attendee", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_registerToEvent_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_cancelRegistration(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_cancelRegistration,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().CancelRegistration(ctx, fc.Args["input"].(EventIDInput))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_cancelRegistration(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_cancelRegistration_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MyEvent_eventID(ctx context.Context, field graphql.CollectedField, obj *MyEvent) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MyEvent_eventID,
+		func(ctx context.Context) (any, error) {
+			return obj.EventID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MyEvent_eventID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MyEvent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MyEvent_status(ctx context.Context, field graphql.CollectedField, obj *MyEvent) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MyEvent_status,
+		func(ctx context.Context) (any, error) {
+			return obj.Status, nil
+		},
+		nil,
+		ec.marshalNStatus2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐStatus,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MyEvent_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MyEvent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Status does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MyEvent_registeredAt(ctx context.Context, field graphql.CollectedField, obj *MyEvent) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MyEvent_registeredAt,
+		func(ctx context.Context) (any, error) {
+			return obj.RegisteredAt, nil
+		},
+		nil,
+		ec.marshalNTime2timeᚐTime,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MyEvent_registeredAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MyEvent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_ping(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1674,6 +2263,155 @@ func (ec *executionContext) fieldContext_Query_getEvents(ctx context.Context, fi
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_getEvents_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getUserRegistrations(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getUserRegistrations,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().GetUserRegistrations(ctx, fc.Args["input"].(GetUserRegistrationsInput))
+		},
+		nil,
+		ec.marshalNMyEvent2ᚕᚖgithubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐMyEventᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getUserRegistrations(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "eventID":
+				return ec.fieldContext_MyEvent_eventID(ctx, field)
+			case "status":
+				return ec.fieldContext_MyEvent_status(ctx, field)
+			case "registeredAt":
+				return ec.fieldContext_MyEvent_registeredAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MyEvent", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getUserRegistrations_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getEventAttendees(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getEventAttendees,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().GetEventAttendees(ctx, fc.Args["input"].(GetEventAttendeesInput))
+		},
+		nil,
+		ec.marshalNAttendee2ᚕᚖgithubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐAttendeeᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getEventAttendees(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Attendee_id(ctx, field)
+			case "eventID":
+				return ec.fieldContext_Attendee_eventID(ctx, field)
+			case "userID":
+				return ec.fieldContext_Attendee_userID(ctx, field)
+			case "status":
+				return ec.fieldContext_Attendee_status(ctx, field)
+			case "registeredAt":
+				return ec.fieldContext_Attendee_registeredAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Attendee", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getEventAttendees_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_exportAttendeesTable(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_exportAttendeesTable,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().ExportAttendeesTable(ctx, fc.Args["eventID"].(string))
+		},
+		nil,
+		ec.marshalNExcelFile2ᚖgithubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐExcelFile,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_exportAttendeesTable(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "filename":
+				return ec.fieldContext_ExcelFile_filename(ctx, field)
+			case "content":
+				return ec.fieldContext_ExcelFile_content(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ExcelFile", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_exportAttendeesTable_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3380,6 +4118,80 @@ func (ec *executionContext) unmarshalInputDeleteEventInput(ctx context.Context, 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputEventIDInput(ctx context.Context, obj any) (EventIDInput, error) {
+	var it EventIDInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"eventID"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "eventID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("eventID"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EventID = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputGetEventAttendeesInput(ctx context.Context, obj any) (GetEventAttendeesInput, error) {
+	var it GetEventAttendeesInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"eventID", "skip", "take"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "eventID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("eventID"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EventID = data
+		case "skip":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("skip"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Skip = data
+		case "take":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("take"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Take = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputGetEventInput(ctx context.Context, obj any) (GetEventInput, error) {
 	var it GetEventInput
 	if obj == nil {
@@ -3412,6 +4224,43 @@ func (ec *executionContext) unmarshalInputGetEventInput(ctx context.Context, obj
 
 func (ec *executionContext) unmarshalInputGetEventsInput(ctx context.Context, obj any) (GetEventsInput, error) {
 	var it GetEventsInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"skip", "take"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "skip":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("skip"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Skip = data
+		case "take":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("take"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Take = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputGetUserRegistrationsInput(ctx context.Context, obj any) (GetUserRegistrationsInput, error) {
+	var it GetUserRegistrationsInput
 	if obj == nil {
 		return it, nil
 	}
@@ -3706,6 +4555,62 @@ func (ec *executionContext) _Account(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var attendeeImplementors = []string{"Attendee"}
+
+func (ec *executionContext) _Attendee(ctx context.Context, sel ast.SelectionSet, obj *Attendee) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, attendeeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Attendee")
+		case "id":
+			out.Values[i] = ec._Attendee_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "eventID":
+			out.Values[i] = ec._Attendee_eventID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "userID":
+			out.Values[i] = ec._Attendee_userID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "status":
+			out.Values[i] = ec._Attendee_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "registeredAt":
+			out.Values[i] = ec._Attendee_registeredAt(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var authPayloadImplementors = []string{"AuthPayload"}
 
 func (ec *executionContext) _AuthPayload(ctx context.Context, sel ast.SelectionSet, obj *AuthPayload) graphql.Marshaler {
@@ -3816,6 +4721,50 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 	return out
 }
 
+var excelFileImplementors = []string{"ExcelFile"}
+
+func (ec *executionContext) _ExcelFile(ctx context.Context, sel ast.SelectionSet, obj *ExcelFile) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, excelFileImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ExcelFile")
+		case "filename":
+			out.Values[i] = ec._ExcelFile_filename(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "content":
+			out.Values[i] = ec._ExcelFile_content(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -3881,6 +4830,69 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_uploadFiles(ctx, field)
 			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "registerToEvent":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_registerToEvent(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "cancelRegistration":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_cancelRegistration(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var myEventImplementors = []string{"MyEvent"}
+
+func (ec *executionContext) _MyEvent(ctx context.Context, sel ast.SelectionSet, obj *MyEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, myEventImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MyEvent")
+		case "eventID":
+			out.Values[i] = ec._MyEvent_eventID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "status":
+			out.Values[i] = ec._MyEvent_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "registeredAt":
+			out.Values[i] = ec._MyEvent_registeredAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -4002,6 +5014,72 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getEvents(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getUserRegistrations":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getUserRegistrations(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getEventAttendees":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getEventAttendees(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "exportAttendeesTable":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_exportAttendeesTable(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -4438,6 +5516,36 @@ func (ec *executionContext) marshalNAccount2ᚖgithubᚗcomᚋsvladislav00ᚑqq�
 	return ec._Account(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNAttendee2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐAttendee(ctx context.Context, sel ast.SelectionSet, v Attendee) graphql.Marshaler {
+	return ec._Attendee(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNAttendee2ᚕᚖgithubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐAttendeeᚄ(ctx context.Context, sel ast.SelectionSet, v []*Attendee) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNAttendee2ᚖgithubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐAttendee(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNAttendee2ᚖgithubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐAttendee(ctx context.Context, sel ast.SelectionSet, v *Attendee) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Attendee(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNAuthPayload2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐAuthPayload(ctx context.Context, sel ast.SelectionSet, v AuthPayload) graphql.Marshaler {
 	return ec._AuthPayload(ctx, sel, &v)
 }
@@ -4508,6 +5616,30 @@ func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋsvladislav00ᚑqqᚋ
 	return ec._Event(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNEventIDInput2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐEventIDInput(ctx context.Context, v any) (EventIDInput, error) {
+	res, err := ec.unmarshalInputEventIDInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNExcelFile2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐExcelFile(ctx context.Context, sel ast.SelectionSet, v ExcelFile) graphql.Marshaler {
+	return ec._ExcelFile(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNExcelFile2ᚖgithubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐExcelFile(ctx context.Context, sel ast.SelectionSet, v *ExcelFile) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ExcelFile(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNGetEventAttendeesInput2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐGetEventAttendeesInput(ctx context.Context, v any) (GetEventAttendeesInput, error) {
+	res, err := ec.unmarshalInputGetEventAttendeesInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNGetEventInput2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐGetEventInput(ctx context.Context, v any) (GetEventInput, error) {
 	res, err := ec.unmarshalInputGetEventInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4515,6 +5647,11 @@ func (ec *executionContext) unmarshalNGetEventInput2githubᚗcomᚋsvladislav00�
 
 func (ec *executionContext) unmarshalNGetEventsInput2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐGetEventsInput(ctx context.Context, v any) (GetEventsInput, error) {
 	res, err := ec.unmarshalInputGetEventsInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNGetUserRegistrationsInput2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐGetUserRegistrationsInput(ctx context.Context, v any) (GetUserRegistrationsInput, error) {
+	res, err := ec.unmarshalInputGetUserRegistrationsInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -4539,6 +5676,32 @@ func (ec *executionContext) unmarshalNLoginInput2githubᚗcomᚋsvladislav00ᚑq
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNMyEvent2ᚕᚖgithubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐMyEventᚄ(ctx context.Context, sel ast.SelectionSet, v []*MyEvent) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNMyEvent2ᚖgithubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐMyEvent(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNMyEvent2ᚖgithubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐMyEvent(ctx context.Context, sel ast.SelectionSet, v *MyEvent) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._MyEvent(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNPromoteToModeratorInput2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐPromoteToModeratorInput(ctx context.Context, v any) (PromoteToModeratorInput, error) {
 	res, err := ec.unmarshalInputPromoteToModeratorInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4556,6 +5719,16 @@ func (ec *executionContext) unmarshalNRole2githubᚗcomᚋsvladislav00ᚑqqᚋev
 }
 
 func (ec *executionContext) marshalNRole2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐRole(ctx context.Context, sel ast.SelectionSet, v Role) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNStatus2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐStatus(ctx context.Context, v any) (Status, error) {
+	var res Status
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNStatus2githubᚗcomᚋsvladislav00ᚑqqᚋeventᚑmicroservicesᚋgraphqlᚐStatus(ctx context.Context, sel ast.SelectionSet, v Status) graphql.Marshaler {
 	return v
 }
 

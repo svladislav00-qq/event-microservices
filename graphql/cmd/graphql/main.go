@@ -45,6 +45,7 @@ func main() {
 
 	http.Handle("/query", graph.AuthMiddleware(gqlServer))
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	http.Handle("/download-table", graph.AuthMiddleware(graph.DownloadAttendeesHandler(srv)))
 
 	port := "8080"
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)

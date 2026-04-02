@@ -21,6 +21,14 @@ type Account struct {
 	DeletedAt  *time.Time `json:"deletedAt,omitempty"`
 }
 
+type Attendee struct {
+	ID           string     `json:"id"`
+	EventID      string     `json:"eventID"`
+	UserID       string     `json:"userID"`
+	Status       Status     `json:"status"`
+	RegisteredAt *time.Time `json:"registeredAt,omitempty"`
+}
+
 type AuthPayload struct {
 	Token string `json:"token"`
 }
@@ -48,11 +56,31 @@ type Event struct {
 	Capacity    *int      `json:"capacity,omitempty"`
 }
 
+type EventIDInput struct {
+	EventID string `json:"eventID"`
+}
+
+type ExcelFile struct {
+	Filename string `json:"filename"`
+	Content  string `json:"content"`
+}
+
+type GetEventAttendeesInput struct {
+	EventID string `json:"eventID"`
+	Skip    *int   `json:"skip,omitempty"`
+	Take    *int   `json:"take,omitempty"`
+}
+
 type GetEventInput struct {
 	ID string `json:"id"`
 }
 
 type GetEventsInput struct {
+	Skip *int `json:"skip,omitempty"`
+	Take *int `json:"take,omitempty"`
+}
+
+type GetUserRegistrationsInput struct {
 	Skip *int `json:"skip,omitempty"`
 	Take *int `json:"take,omitempty"`
 }
@@ -63,6 +91,12 @@ type LoginInput struct {
 }
 
 type Mutation struct {
+}
+
+type MyEvent struct {
+	EventID      string    `json:"eventID"`
+	Status       Status    `json:"status"`
+	RegisteredAt time.Time `json:"registeredAt"`
 }
 
 type PromoteToModeratorInput struct {
@@ -145,6 +179,63 @@ func (e *Role) UnmarshalJSON(b []byte) error {
 }
 
 func (e Role) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type Status string
+
+const (
+	StatusUnknown    Status = "UNKNOWN"
+	StatusRegistered Status = "REGISTERED"
+	StatusCanceled   Status = "CANCELED"
+)
+
+var AllStatus = []Status{
+	StatusUnknown,
+	StatusRegistered,
+	StatusCanceled,
+}
+
+func (e Status) IsValid() bool {
+	switch e {
+	case StatusUnknown, StatusRegistered, StatusCanceled:
+		return true
+	}
+	return false
+}
+
+func (e Status) String() string {
+	return string(e)
+}
+
+func (e *Status) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Status(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Status", str)
+	}
+	return nil
+}
+
+func (e Status) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *Status) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e Status) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

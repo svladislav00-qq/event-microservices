@@ -7,6 +7,12 @@ enum Role {
   ADMIN
 }
 
+enum Status {
+  UNKNOWN
+  REGISTERED
+  CANCELED
+}
+
 type Account {
   id: ID!
   email: String!
@@ -39,6 +45,25 @@ input RegisterInput {
   username: String!
 }
 
+type Attendee {
+  id: String!
+  eventID: String!
+  userID: String!
+  status: Status!
+  registeredAt: Time
+}
+
+type MyEvent {
+  eventID: String!
+  status: Status!
+  registeredAt: Time!
+}
+
+type ExcelFile {
+  filename: String!
+  content: String!
+}
+
 
 type Query {
   #auth
@@ -48,6 +73,11 @@ type Query {
   #event
   getEvent(input: GetEventInput!): Event!
   getEvents(input: GetEventsInput!): [Event!]!
+
+  #attendee
+  getUserRegistrations(input: GetUserRegistrationsInput!): [MyEvent!]!
+  getEventAttendees(input: GetEventAttendeesInput!): [Attendee!]!
+  exportAttendeesTable(eventID: ID!): ExcelFile!
 }
 
 type Mutation {
@@ -61,6 +91,10 @@ type Mutation {
   updateEvent(input: UpdateEventInput!): Event!
   deleteEvent(input: DeleteEventInput!): Boolean!
   uploadFiles(id: ID!, files: [Upload!]!): [UploadFileResponse!]!
+
+  #attendee
+  registerToEvent(input: EventIDInput!): Attendee!
+  cancelRegistration(input: EventIDInput!): Boolean!
 }
 
 input LoginInput {
@@ -110,4 +144,19 @@ input GetEventsInput {
 type UploadFileResponse {
   uploadUrl: String!
   fileKey: String!
+}
+
+input GetUserRegistrationsInput {
+  skip: Int
+  take: Int
+}
+
+input EventIDInput {
+  eventID: ID!
+}
+
+input GetEventAttendeesInput {
+  eventID: ID!
+  skip: Int
+  take: Int
 }

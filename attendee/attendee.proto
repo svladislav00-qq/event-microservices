@@ -36,7 +36,6 @@ service AttendeeService {
 
 message RegisterToEventRequest {
     string event_id = 1;
-    string user_id = 2;
 }
 
 message RegisterToEventResponse {
@@ -45,7 +44,6 @@ message RegisterToEventResponse {
 
 message CancelRegistrationRequest {
     string event_id = 1;
-    string user_id = 2;
 }
 
 message CancelRegistrationResponse {}

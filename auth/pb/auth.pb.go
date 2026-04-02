@@ -82,6 +82,7 @@ type Account struct {
 	Role          Role                   `protobuf:"varint,4,opt,name=role,proto3,enum=pb.Role" json:"role,omitempty"`
 	Department    string                 `protobuf:"bytes,5,opt,name=department,proto3" json:"department,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -154,6 +155,13 @@ func (x *Account) GetDepartment() string {
 func (x *Account) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *Account) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
 	}
 	return nil
 }
@@ -679,7 +687,7 @@ var File_auth_proto protoreflect.FileDescriptor
 const file_auth_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"auth.proto\x12\x02pb\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc4\x01\n" +
+	"auth.proto\x12\x02pb\x1a\x1fgoogle/protobuf/timestamp.proto\"\xff\x01\n" +
 	"\aAccount\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
@@ -689,7 +697,9 @@ const file_auth_proto_rawDesc = "" +
 	"department\x18\x05 \x01(\tR\n" +
 	"department\x129\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"_\n" +
+	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"_\n" +
 	"\x0fRegisterRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x1a\n" +
@@ -764,25 +774,26 @@ var file_auth_proto_goTypes = []any{
 var file_auth_proto_depIdxs = []int32{
 	0,  // 0: pb.Account.role:type_name -> pb.Role
 	13, // 1: pb.Account.created_at:type_name -> google.protobuf.Timestamp
-	1,  // 2: pb.RegisterResponse.account:type_name -> pb.Account
-	1,  // 3: pb.PromoteToModeratorResponse.account:type_name -> pb.Account
-	1,  // 4: pb.GetMeResponse.account:type_name -> pb.Account
-	12, // 5: pb.GetUsersByIDsResponse.users:type_name -> pb.User
-	2,  // 6: pb.AuthService.Register:input_type -> pb.RegisterRequest
-	4,  // 7: pb.AuthService.Login:input_type -> pb.LoginRequest
-	6,  // 8: pb.AuthService.PromoteToModerator:input_type -> pb.PromoteToModeratorRequest
-	8,  // 9: pb.AuthService.GetMe:input_type -> pb.GetMeRequest
-	10, // 10: pb.AuthService.GetUsersByIDs:input_type -> pb.GetUsersByIDsRequest
-	3,  // 11: pb.AuthService.Register:output_type -> pb.RegisterResponse
-	5,  // 12: pb.AuthService.Login:output_type -> pb.LoginResponse
-	7,  // 13: pb.AuthService.PromoteToModerator:output_type -> pb.PromoteToModeratorResponse
-	9,  // 14: pb.AuthService.GetMe:output_type -> pb.GetMeResponse
-	11, // 15: pb.AuthService.GetUsersByIDs:output_type -> pb.GetUsersByIDsResponse
-	11, // [11:16] is the sub-list for method output_type
-	6,  // [6:11] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	13, // 2: pb.Account.updated_at:type_name -> google.protobuf.Timestamp
+	1,  // 3: pb.RegisterResponse.account:type_name -> pb.Account
+	1,  // 4: pb.PromoteToModeratorResponse.account:type_name -> pb.Account
+	1,  // 5: pb.GetMeResponse.account:type_name -> pb.Account
+	12, // 6: pb.GetUsersByIDsResponse.users:type_name -> pb.User
+	2,  // 7: pb.AuthService.Register:input_type -> pb.RegisterRequest
+	4,  // 8: pb.AuthService.Login:input_type -> pb.LoginRequest
+	6,  // 9: pb.AuthService.PromoteToModerator:input_type -> pb.PromoteToModeratorRequest
+	8,  // 10: pb.AuthService.GetMe:input_type -> pb.GetMeRequest
+	10, // 11: pb.AuthService.GetUsersByIDs:input_type -> pb.GetUsersByIDsRequest
+	3,  // 12: pb.AuthService.Register:output_type -> pb.RegisterResponse
+	5,  // 13: pb.AuthService.Login:output_type -> pb.LoginResponse
+	7,  // 14: pb.AuthService.PromoteToModerator:output_type -> pb.PromoteToModeratorResponse
+	9,  // 15: pb.AuthService.GetMe:output_type -> pb.GetMeResponse
+	11, // 16: pb.AuthService.GetUsersByIDs:output_type -> pb.GetUsersByIDsResponse
+	12, // [12:17] is the sub-list for method output_type
+	7,  // [7:12] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_auth_proto_init() }

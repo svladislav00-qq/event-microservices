@@ -55,6 +55,7 @@ func (c *Client) Register(ctx context.Context, email string, password string, us
 		Username:  r.Account.Username,
 		Role:      r.Account.Role.String(),
 		CreatedAt: r.Account.CreatedAt.AsTime(),
+		UpdatedAt: r.Account.UpdatedAt.AsTime(),
 	}, nil
 }
 

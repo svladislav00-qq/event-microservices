@@ -210,7 +210,6 @@ func (x *MyEvent) GetRegisteredAt() *timestamppb.Timestamp {
 type RegisterToEventRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -248,13 +247,6 @@ func (*RegisterToEventRequest) Descriptor() ([]byte, []int) {
 func (x *RegisterToEventRequest) GetEventId() string {
 	if x != nil {
 		return x.EventId
-	}
-	return ""
-}
-
-func (x *RegisterToEventRequest) GetUserId() string {
-	if x != nil {
-		return x.UserId
 	}
 	return ""
 }
@@ -306,7 +298,6 @@ func (x *RegisterToEventResponse) GetAttendee() *Attendee {
 type CancelRegistrationRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -344,13 +335,6 @@ func (*CancelRegistrationRequest) Descriptor() ([]byte, []int) {
 func (x *CancelRegistrationRequest) GetEventId() string {
 	if x != nil {
 		return x.EventId
-	}
-	return ""
-}
-
-func (x *CancelRegistrationRequest) GetUserId() string {
-	if x != nil {
-		return x.UserId
 	}
 	return ""
 }
@@ -711,15 +695,13 @@ const file_attendee_proto_rawDesc = "" +
 	"\bevent_id\x18\x01 \x01(\tR\aeventId\x12\"\n" +
 	"\x06status\x18\x02 \x01(\x0e2\n" +
 	".pb.StatusR\x06status\x12?\n" +
-	"\rregistered_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\fregisteredAt\"L\n" +
+	"\rregistered_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\fregisteredAt\"3\n" +
 	"\x16RegisterToEventRequest\x12\x19\n" +
-	"\bevent_id\x18\x01 \x01(\tR\aeventId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"C\n" +
+	"\bevent_id\x18\x01 \x01(\tR\aeventId\"C\n" +
 	"\x17RegisterToEventResponse\x12(\n" +
-	"\battendee\x18\x01 \x01(\v2\f.pb.AttendeeR\battendee\"O\n" +
+	"\battendee\x18\x01 \x01(\v2\f.pb.AttendeeR\battendee\"6\n" +
 	"\x19CancelRegistrationRequest\x12\x19\n" +
-	"\bevent_id\x18\x01 \x01(\tR\aeventId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"\x1c\n" +
+	"\bevent_id\x18\x01 \x01(\tR\aeventId\"\x1c\n" +
 	"\x1aCancelRegistrationResponse\"^\n" +
 	"\x1bGetUserRegistrationsRequest\x12\x12\n" +
 	"\x04skip\x18\x01 \x01(\x04R\x04skip\x12\x12\n" +

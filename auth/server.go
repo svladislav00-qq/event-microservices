@@ -49,6 +49,7 @@ func (s *serverAuth) Register(ctx context.Context, req *pb.RegisterRequest) (*pb
 		Username:  res.Username,
 		Role:      roleToProto(res.Role),
 		CreatedAt: timestamppb.New(res.CreatedAt),
+		UpdatedAt: timestamppb.New(res.UpdatedAt),
 	}}, nil
 }
 

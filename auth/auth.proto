@@ -20,6 +20,7 @@ message Account {
     Role role = 4;
     string department = 5;
     google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
 }
 
 service AuthService {

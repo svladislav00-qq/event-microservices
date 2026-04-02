@@ -7,6 +7,7 @@ package graphql
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"io"
 
@@ -36,10 +37,12 @@ func (r *mutationResolver) Register(ctx context.Context, input RegisterInput) (*
 	}
 
 	return &Account{
-		ID:       resp.ID,
-		Email:    resp.Email,
-		Username: resp.Username,
-		Role:     Role(resp.Role),
+		ID:        resp.ID,
+		Email:     resp.Email,
+		Username:  resp.Username,
+		Role:      Role(resp.Role),
+		CreatedAt: resp.CreatedAt,
+		UpdatedAt: resp.UpdatedAt,
 	}, nil
 }
 
@@ -176,6 +179,31 @@ func (r *mutationResolver) UploadFiles(ctx context.Context, id string, files []*
 	return result, nil
 }
 
+// RegisterToEvent is the resolver for the registerToEvent field.
+func (r *mutationResolver) RegisterToEvent(ctx context.Context, input EventIDInput) (*Attendee, error) {
+	resp, err := r.Resolver.Server.attendeeClient.RegisterToEvent(ctx, input.EventID)
+	if err != nil {
+		return nil, err
+	}
+	return &Attendee{
+		ID:           resp.ID,
+		UserID:       resp.UserID,
+		EventID:      resp.EventID,
+		Status:       Status(resp.Status),
+		RegisteredAt: &resp.RegisteredAt,
+	}, nil
+}
+
+// CancelRegistration is the resolver for the cancelRegistration field.
+func (r *mutationResolver) CancelRegistration(ctx context.Context, input EventIDInput) (bool, error) {
+	err := r.Resolver.Server.attendeeClient.CancelRegistration(ctx, input.EventID)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 // Ping is the resolver for the ping field.
 func (r *queryResolver) Ping(ctx context.Context) (string, error) {
 	_ = r.Resolver.Server
@@ -248,6 +276,81 @@ func (r *queryResolver) GetEvents(ctx context.Context, input GetEventsInput) ([]
 	}
 
 	return result, nil
+}
+
+// GetUserRegistrations is the resolver for the getUserRegistrations field.
+func (r *queryResolver) GetUserRegistrations(ctx context.Context, input GetUserRegistrationsInput) ([]*MyEvent, error) {
+	var skip uint32
+	if input.Skip != nil {
+		skip = uint32(*input.Skip)
+	}
+
+	var take uint32
+	if input.Take != nil {
+		take = uint32(*input.Take)
+	}
+
+	resp, err := r.Resolver.Server.attendeeClient.GetUserRegistrations(ctx, skip, take)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*MyEvent
+	for _, e := range resp {
+		result = append(result, &MyEvent{
+			EventID:      e.EventID,
+			Status:       Status(e.Status),
+			RegisteredAt: e.RegisteredAt,
+		})
+	}
+
+	return result, nil
+}
+
+// GetEventAttendees is the resolver for the getEventAttendees field.
+func (r *queryResolver) GetEventAttendees(ctx context.Context, input GetEventAttendeesInput) ([]*Attendee, error) {
+	var skip uint32
+	if input.Skip != nil {
+		skip = uint32(*input.Skip)
+	}
+
+	var take uint32
+	if input.Take != nil {
+		take = uint32(*input.Take)
+	}
+
+	resp, err := r.Resolver.Server.attendeeClient.GetEventAttendees(ctx, input.EventID, skip, take)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*Attendee
+	for _, e := range resp {
+		result = append(result, &Attendee{
+			ID:           e.ID,
+			UserID:       e.UserID,
+			EventID:      e.UserID,
+			Status:       Status(e.Status),
+			RegisteredAt: &e.RegisteredAt,
+		})
+	}
+
+	return result, nil
+}
+
+// ExportAttendeesTable is the resolver for the exportAttendeesTable field.
+func (r *queryResolver) ExportAttendeesTable(ctx context.Context, eventID string) (*ExcelFile, error) {
+	data, filename, err := r.Resolver.Server.attendeeClient.ExportAttendeeTable(ctx, eventID)
+	if err != nil {
+		return nil, err
+	}
+
+	encoded := base64.StdEncoding.EncodeToString(data)
+
+	return &ExcelFile{
+		Filename: filename,
+		Content:  encoded,
+	}, nil
 }
 
 // Mutation returns MutationResolver implementation.
