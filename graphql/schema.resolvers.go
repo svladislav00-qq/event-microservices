@@ -73,7 +73,7 @@ func (r *mutationResolver) PromoteToModerator(ctx context.Context, input Promote
 		ID:         resp.Account.Id,
 		Email:      resp.Account.Email,
 		Username:   resp.Account.Username,
-		Role:       Role(resp.Account.Role),
+		Role:       Role(resp.Account.Role.String()),
 		Department: &resp.Account.Department,
 	}, nil
 }
@@ -378,7 +378,7 @@ func (r *queryResolver) GetUserRegistrations(ctx context.Context, input GetUserR
 	for _, e := range resp.Events {
 		result = append(result, &MyEvent{
 			EventID:      e.EventId,
-			Status:       Status(e.Status),
+			Status:       Status(e.Status.String()),
 			RegisteredAt: e.RegisteredAt.AsTime(),
 		})
 	}
@@ -419,7 +419,7 @@ func (r *queryResolver) GetEventAttendees(ctx context.Context, input GetEventAtt
 			ID:           e.Id,
 			UserID:       e.UserId,
 			EventID:      e.EventId,
-			Status:       Status(e.Status),
+			Status:       Status(e.Status.String()),
 			RegisteredAt: registeredAt,
 		})
 	}

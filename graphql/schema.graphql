@@ -1,6 +1,12 @@
+# =========================
+# SCALARS
+# =========================
 scalar Time
 scalar Upload
 
+# =========================
+# ENUMS
+# =========================
 enum Role {
   USER
   MODERATOR
@@ -13,14 +19,15 @@ enum Status {
   CANCELED
 }
 
+# =========================
+# TYPES (MODELS)
+# =========================
 type Account {
   id: ID!
   email: String!
   username: String!
   role: Role!
-
   department: String
-
   createdAt: Time!
   updatedAt: Time!
   deletedAt: Time
@@ -32,20 +39,11 @@ type Event {
   description: String!
   department: String!
   createdBy: String!
-
   startTime: Time!
   endTime: Time!
   createdAt: Time!
-
   capacity: Int
   fileUrls: [String!]
-
-}
-
-input RegisterInput {
-  email: String!
-  password: String!
-  username: String!
 }
 
 type Attendee {
@@ -62,42 +60,30 @@ type MyEvent {
   registeredAt: Time!
 }
 
+# =========================
+# RESPONSE / PAYLOAD TYPES
+# =========================
+type AuthPayload {
+  token: String!
+}
+
+type UploadFileResponse {
+  uploadUrl: String!
+  fileKey: String!
+}
+
 type ExcelFile {
   filename: String!
   content: String!
 }
 
-
-type Query {
-  #auth
-  ping: String!
-  me: Account!
-
-  #event
-  getEvent(input: GetEventInput!): Event!
-  getEvents(input: GetEventsInput!): [Event!]!
-
-  #attendee
-  getUserRegistrations(input: GetUserRegistrationsInput!): [MyEvent!]!
-  getEventAttendees(input: GetEventAttendeesInput!): [Attendee!]!
-  exportAttendeesTable(eventID: ID!): ExcelFile!
-}
-
-type Mutation {
-  #auth 
-  login(input: LoginInput!): AuthPayload!
-  register(input: RegisterInput!): Account!
-  promoteToModerator(input: PromoteToModeratorInput!): Account!
-
-  #event 
-  createEvent(input: CreateEventInput!): Event!
-  updateEvent(input: UpdateEventInput!): Event!
-  deleteEvent(input: DeleteEventInput!): Boolean!
-  uploadFiles(id: ID!, files: [Upload!]!): [UploadFileResponse!]!
-
-  #attendee
-  registerToEvent(input: EventIDInput!): Attendee!
-  cancelRegistration(input: EventIDInput!): Boolean!
+# =========================
+# INPUT TYPES
+# =========================
+input RegisterInput {
+  email: String!
+  password: String!
+  username: String!
 }
 
 input LoginInput {
@@ -105,13 +91,9 @@ input LoginInput {
   password: String!
 }
 
-input PromoteToModeratorInput{
+input PromoteToModeratorInput {
   id: ID!
   department: String!
-}
-
-type AuthPayload {
-  token: String!
 }
 
 input CreateEventInput {
@@ -144,11 +126,6 @@ input GetEventsInput {
   take: Int
 }
 
-type UploadFileResponse {
-  uploadUrl: String!
-  fileKey: String!
-}
-
 input GetUserRegistrationsInput {
   skip: Int
   take: Int
@@ -162,4 +139,42 @@ input GetEventAttendeesInput {
   eventID: ID!
   skip: Int
   take: Int
+}
+
+# =========================
+# QUERY
+# =========================
+type Query {
+  # auth
+  ping: String!
+  me: Account!
+
+  # event
+  getEvent(input: GetEventInput!): Event!
+  getEvents(input: GetEventsInput!): [Event!]!
+
+  # attendee
+  getUserRegistrations(input: GetUserRegistrationsInput!): [MyEvent!]!
+  getEventAttendees(input: GetEventAttendeesInput!): [Attendee!]!
+  exportAttendeesTable(eventID: ID!): ExcelFile!
+}
+
+# =========================
+# MUTATION
+# =========================
+type Mutation {
+  # auth
+  login(input: LoginInput!): AuthPayload!
+  register(input: RegisterInput!): Account!
+  promoteToModerator(input: PromoteToModeratorInput!): Account!
+
+  # event
+  createEvent(input: CreateEventInput!): Event!
+  updateEvent(input: UpdateEventInput!): Event!
+  deleteEvent(input: DeleteEventInput!): Boolean!
+  uploadFiles(id: ID!, files: [Upload!]!): [UploadFileResponse!]!
+
+  # attendee
+  registerToEvent(input: EventIDInput!): Attendee!
+  cancelRegistration(input: EventIDInput!): Boolean!
 }

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	attendeepb "github.com/svladislav00-qq/event-microservices/attendee/pb"
+	"google.golang.org/grpc/metadata"
 )
 
 func DownloadAttendeesHandler(server *Server) http.HandlerFunc {
@@ -14,7 +15,15 @@ func DownloadAttendeesHandler(server *Server) http.HandlerFunc {
 			return
 		}
 
-		resp, err := server.attendeeClient.ExportAttendeesTable(r.Context(), &attendeepb.ExportAttendeesTableRequest{
+		authHeader := r.Header.Get("authorization")
+		if authHeader == "" {
+			http.Error(w, "no auth header", http.StatusUnauthorized)
+			return
+		}
+
+		ctx := metadata.AppendToOutgoingContext(r.Context(), "authorization", authHeader)
+
+		resp, err := server.attendeeClient.ExportAttendeesTable(ctx, &attendeepb.ExportAttendeesTableRequest{
 			EventId: eventID,
 		})
 		if err != nil {
