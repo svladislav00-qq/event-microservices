@@ -92,7 +92,7 @@ Backend-приложение для управления мероприятия�
 ### Клонирование репозитория
 
 ```bash
-git clone https://github.com/svladislav00-qq/event-microservices.git
+git clone https://github.com/svladislav00-qq/event-microservices
 cd event-microservices
 ```
 
