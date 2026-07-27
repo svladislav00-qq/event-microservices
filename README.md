@@ -74,11 +74,12 @@ Backend-приложение для управления мероприятия�
 
 ```text
 .
-├── auth/
 ├── attendee/
+├── auth/
+├── docker
 ├── event/
 ├── graphql/
-├── proto/
+├── pkg
 ├── docker-compose.yml
 └── README.md
 ```
