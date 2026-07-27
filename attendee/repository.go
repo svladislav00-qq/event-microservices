@@ -109,7 +109,7 @@ func (r *postgresRepository) GetUserRegistrations(ctx context.Context, af Attend
 		af.Take = 10
 	}
 
-	db = db.Limit(int(af.Take))
+	db = db.Order("registered_at DESC, id DESC").Offset(int(af.Skip)).Limit(int(af.Take))
 
 	var attendees []Attendee
 	if err := db.Find(&attendees).Error; err != nil {
@@ -129,7 +129,7 @@ func (r *postgresRepository) GetEventRegistrations(ctx context.Context, skip uin
 		take = 10
 	}
 
-	db = db.Order("registered_at DESC").Limit(int(take)).Offset(int(skip))
+	db = db.Order("registered_at DESC, id DESC").Limit(int(take)).Offset(int(skip))
 
 	var attendees []Attendee
 	err := db.Find(&attendees).Error

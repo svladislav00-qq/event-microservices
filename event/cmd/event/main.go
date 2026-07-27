@@ -40,7 +40,13 @@ func main() {
 	defer repo.Close()
 	logg.Info("database connected")
 
-	minio.CreateCloud()
+	retry.ForeverSleep(2*time.Second, func(_ int) error {
+		if err := minio.CreateCloud(); err != nil {
+			logg.Error("failed to connect to MinIO", slog.Any("error", err))
+			return err
+		}
+		return nil
+	})
 
 	storage := event.New(
 		minio.MinioClient,

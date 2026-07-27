@@ -8,10 +8,17 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/01-create-databases.sql:ro
 
   minio:
     image: minio/minio
@@ -25,6 +32,12 @@ services:
       - "9001:9001"
     volumes:
       - minio_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/live || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
 
   auth:
     build:
@@ -34,7 +47,9 @@ services:
     env_file:
       - ./auth/.env
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
     ports:
       - "44044:44044"
 
@@ -46,8 +61,11 @@ services:
     env_file:
       - ./event/.env
     depends_on:
-      - postgres
-      - minio
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
     ports:
       - "44045:44045"
 
@@ -59,8 +77,11 @@ services:
     env_file:
       - ./attendee/.env
     depends_on:
-      - postgres
-      - auth
+      postgres:
+        condition: service_healthy
+      auth:
+        condition: service_started
+    restart: unless-stopped
     ports:
       - "44046:44046"
 
@@ -72,9 +93,13 @@ services:
     env_file:
       - ./graphql/.env
     depends_on:
-      - auth
-      - event
-      - attendee
+      auth:
+        condition: service_started
+      event:
+        condition: service_started
+      attendee:
+        condition: service_started
+    restart: unless-stopped
     ports:
       - "8080:8080"
 

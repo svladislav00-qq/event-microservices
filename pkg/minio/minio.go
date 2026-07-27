@@ -2,8 +2,8 @@ package minio
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 
@@ -15,7 +15,7 @@ var MinioClient *minio.Client
 var MinioBucket string
 var MinioPublicURL string
 
-func CreateCloud() {
+func CreateCloud() error {
 	ctx := context.Background()
 
 	endpoint := os.Getenv("MINIO_ENDPOINT")
@@ -28,7 +28,7 @@ func CreateCloud() {
 		Secure: useSSL,
 	})
 	if err != nil {
-		log.Fatalln(err)
+		return fmt.Errorf("create minio client: %w", err)
 	}
 
 	fmt.Println("Connected to MinIO")
@@ -46,9 +46,11 @@ func CreateCloud() {
 		if errBucket == nil && exists {
 			fmt.Println("Bucket already exists:", bucket)
 		} else {
-			log.Fatalln(err)
+			return errors.Join(err, errBucket)
 		}
 	} else {
 		fmt.Println("Created bucket:", bucket)
 	}
+
+	return nil
 }
