@@ -99,6 +99,13 @@ cd event-microservices
 docker compose up --build -d
 ```
 
+### Назначение администратора
+
+```bash
+docker exec event_postgres psql -U postgres -d event_ms_accounts -c "UPDATE accounts SET role = 'admin', updated_at = NOW() WHERE email = 'user@example.com';"
+```
+Использовать после регистрации пользователя для создания пользователя с ролью 'admin' для назначения модерации.
+
 ## Дальнейшее развитие
 
 Планируется:
